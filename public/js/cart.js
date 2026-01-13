@@ -1,22 +1,58 @@
-// Simple cart manager using localStorage
+// Simple cart manager using localStorage with user-specific storage
 (function() {
   'use strict';
-  const STORAGE_KEY = 'corefivegadgets_cart_v1';
+  
+  // Generate user-specific storage key
+  function getStorageKey() {
+    // If authenticated, use userId; otherwise use session/guest ID
+    if (window.isAuthenticated && window.userId) {
+      return 'corefivegadgets_cart_user_' + window.userId;
+    } else {
+      // For guest users, use a temporary session-based key
+      const sessionKey = 'corefivegadgets_guest_id';
+      let guestId = sessionStorage.getItem(sessionKey);
+      if (!guestId) {
+        guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        sessionStorage.setItem(sessionKey, guestId);
+      }
+      return 'corefivegadgets_cart_' + guestId;
+    }
+  }
 
   function readCart() {
     try {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      return JSON.parse(localStorage.getItem(getStorageKey()) || '[]');
     } catch (e) {
       return [];
     }
   }
 
   function writeCart(cart) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+    localStorage.setItem(getStorageKey(), JSON.stringify(cart));
   }
 
   function formatPrice(n) {
     return '₱' + Number(n).toLocaleString();
+  }
+
+  function updateBadge(animate = false) {
+    const cart = readCart();
+    const badge = document.getElementById('cartBadge');
+    if (badge) {
+      const count = cart.length; // Count individual items, not quantities
+      badge.textContent = count; // Update count immediately
+      if (count > 0) {
+        badge.style.display = 'inline-block';
+        // Only trigger animation if explicitly requested
+        if (animate) {
+          badge.classList.remove('pop');
+          void badge.offsetWidth; // Force reflow to restart animation
+          badge.classList.add('pop');
+        }
+      } else {
+        badge.style.display = 'none';
+      }
+    }
   }
 
   function render() {
@@ -33,6 +69,9 @@
     }
 
     if (summary) summary.style.display = 'block';
+
+    // Update badge (no animation on render)
+    updateBadge(false);
 
     cart.forEach((item, idx) => {
       const el = document.createElement('div');
@@ -112,6 +151,9 @@
         checkoutBtn.removeAttribute('aria-disabled');
       }
     }
+
+    // Update cart badge
+    updateBadge();
   }
 
   // Public API
@@ -136,6 +178,9 @@
       }
       writeCart(cart);
       render();
+      
+      // Update badge with animation
+      updateBadge(true);
     },
     clear: function() {
       writeCart([]);
@@ -145,5 +190,8 @@
   };
 
   // Init
-  document.addEventListener('DOMContentLoaded', render);
+  document.addEventListener('DOMContentLoaded', function() {
+    render();
+    updateBadge(false);
+  });
 })();

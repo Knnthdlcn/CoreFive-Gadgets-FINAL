@@ -59,42 +59,8 @@
         <div class="container">
             <h1 class="display-4 fw-bold mb-3">Welcome to CoreFive Gadgets</h1>
             <p class="lead mb-4">Discover premium products for your business and lifestyle</p>
-            <div class="d-flex gap-3 justify-content-center">
-                <a href="#featured-products" class="btn btn-warning btn-lg" style="border-radius: 10px; font-weight: 600; padding: 14px 32px; background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); border: none; color: #000; box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3); transition: all 0.3s ease;">Shop Now</a>
-                <a href="{{ route('products.index') }}" class="btn btn-outline-light btn-lg" style="border-radius: 10px; font-weight: 600; padding: 14px 32px; border: 2px solid #ffc107; color: #ffc107; transition: all 0.3s ease;">View All Products</a>
-            </div>
         </div>
     </header>
-
-    <!-- CATEGORIES -->
-    <section class="py-4 bg-white">
-        <div class="container">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3 class="mb-0" style="font-weight:700;">Shop by Category</h3>
-                <a href="#featured-products" class="text-muted small">See featured →</a>
-            </div>
-            <div class="row g-3 justify-content-center">
-                <div class="col-6 col-md-4">
-                    <a href="#" class="text-decoration-none category-card d-block text-center p-3 rounded">
-                        <i class="fas fa-mobile-screen fa-2x mb-2"></i>
-                        <div class="small fw-semibold">Phones</div>
-                    </a>
-                </div>
-                <div class="col-6 col-md-4">
-                    <a href="#" class="text-decoration-none category-card d-block text-center p-3 rounded">
-                        <i class="fas fa-laptop fa-2x mb-2"></i>
-                        <div class="small fw-semibold">Computing</div>
-                    </a>
-                </div>
-                <div class="col-6 col-md-4">
-                    <a href="#" class="text-decoration-none category-card d-block text-center p-3 rounded">
-                        <i class="fas fa-mouse fa-2x mb-2"></i>
-                        <div class="small fw-semibold">Accessories</div>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <!-- PRODUCTS -->
     <section class="py-5" id="featured-products">
@@ -104,16 +70,16 @@
             <div class="row g-4">
                 @forelse($products as $product)
                     <div class="col-md-4">
-                        <div class="card h-100 border-0 shadow-sm product-card" style="transition: all 0.3s ease; border-radius: 12px; overflow: hidden;">
-                            <div class="card-img-wrapper position-relative overflow-hidden view-product" style="height: 280px; background: linear-gradient(135deg, #dee2e6 0%, #ced4da 100%); cursor: pointer;" data-product='@json($product)'>
-                                <img src="{{ $product->image_url }}" class="card-img-top w-100 h-100" alt="{{ $product->product_name }}" style="object-fit: contain; padding: 20px; transition: transform 0.3s ease;">
+                        <div class="card h-100 border-0 shadow-sm product-card" style="transition: all 0.3s ease; border-radius: 12px; overflow: hidden; background: #ffffff;">
+                            <div class="card-img-wrapper position-relative overflow-hidden view-product" style="height: 280px; background: #ffffff; cursor: pointer; border: 1px solid #f0f0f0;" data-product='@json($product)'>
+                                <img src="{{ $product->image_url }}" class="card-img-top w-100 h-100" alt="{{ $product->product_name }}" style="object-fit: contain; padding: 10px; transition: transform 0.3s ease;">
                                 <div class="overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(0, 0, 0, 0); transition: background 0.3s ease; pointer-events: none;">
                                     <span class="badge bg-dark text-white px-3 py-2" style="opacity: 0; transition: opacity 0.3s ease;">
                                         <i class="fas fa-eye me-1"></i> Quick View
                                     </span>
                                 </div>
                             </div>
-                            <div class="card-body d-flex flex-column p-4">
+                            <div class="card-body d-flex flex-column p-4" style="background: #ffffff;">
                                 <h5 class="card-title mb-2" style="font-weight: 600; font-size: 1.1rem; color: #2c3e50;">
                                     {{ $product->product_name }}
                                 </h5>
@@ -169,9 +135,7 @@
             function NewsletterSignup() {
                 const email = document.getElementById('newsletterEmail').value || '';
                 if (!email) return;
-                if (window.Toast && window.Toast.show) {
-                    window.Toast.show('Thanks — we will send updates to ' + email, { duration: 3000 });
-                } else {
+ else {
                     alert('Thanks — we will send updates to ' + email);
                 }
                 document.getElementById('newsletterEmail').value = '';

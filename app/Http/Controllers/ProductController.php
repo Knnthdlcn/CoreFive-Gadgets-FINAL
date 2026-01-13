@@ -9,10 +9,20 @@ use Illuminate\Support\Facades\Auth;
 
 class ProductController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $products = Product::all();
-        return view('products', ['products' => $products]);
+        $category = $request->query('category');
+        
+        if ($category) {
+            $products = Product::where('category', $category)->get();
+        } else {
+            $products = Product::all();
+        }
+        
+        return view('products', [
+            'products' => $products,
+            'selectedCategory' => $category
+        ]);
     }
 
     public function store(Request $request)

@@ -10,7 +10,7 @@ class Product extends Model
     use HasFactory;
 
     protected $primaryKey = 'product_id';
-    protected $fillable = ['product_name', 'name', 'description', 'price', 'image_path', 'image'];
+    protected $fillable = ['product_name', 'name', 'description', 'price', 'image_path', 'image', 'category'];
     public $timestamps = false;
         // Append computed URL to JSON output
         protected $appends = ['image_url'];

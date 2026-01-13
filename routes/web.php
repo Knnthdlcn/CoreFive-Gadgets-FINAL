@@ -21,9 +21,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middl
 
 // Protected routes (require authentication)
 Route::middleware(['web'])->group(function () {
-    Route::get('/cart', [CartController::class, 'index'])
-        ->middleware(\App\Http\Middleware\RedirectIfUnauthenticatedCart::class)
-        ->name('cart.index');
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
     
     Route::middleware('auth')->group(function () {
         Route::get('/checkout', [OrderController::class, 'checkout'])->name('checkout.index');

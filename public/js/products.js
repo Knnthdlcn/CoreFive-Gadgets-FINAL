@@ -48,9 +48,11 @@
     const modal = document.getElementById('productViewModal');
     if (!modal) return;
 
-    document.getElementById('productModalTitle').textContent = product.title || '';
-    document.getElementById('pvImage').src = product.image_url || product.image || '';
-    document.getElementById('pvPrice').textContent = product.price ? ('₱' + product.price.toLocaleString()) : '';
+    document.getElementById('productModalTitle').textContent = product.title || product.product_name || '';
+    const imgSrc = product.image_url || product.image || product.image_path || '';
+    document.getElementById('pvImage').src = imgSrc;
+    document.getElementById('pvImage').alt = product.title || product.product_name || 'Product';
+    document.getElementById('pvPrice').textContent = product.price ? ('₱' + parseFloat(product.price).toLocaleString()) : '';
     document.getElementById('pvDesc').textContent = product.description || '';
 
     const bsModal = new bootstrap.Modal(modal);
@@ -63,10 +65,13 @@
         return;
       }
       if (window.Cart && window.Cart.addToCart) {
-        window.Cart.addToCart(product);
-        if (window.Toast && window.Toast.show) {
-          window.Toast.show(product.title + ' added to cart');
-        }
+        const cartProduct = {
+          product_id: product.id || product.product_id,
+          name: product.title || product.product_name,
+          price: parseFloat(product.price),
+          image: imgSrc
+        };
+        window.Cart.addToCart(cartProduct);
         bsModal.hide();
       }
     };
@@ -81,7 +86,15 @@
         }
         if (window.Cart) {
           if (window.Cart.clear) window.Cart.clear();
-          if (window.Cart.addToCart) window.Cart.addToCart(product);
+          if (window.Cart.addToCart) {
+            const cartProduct = {
+              product_id: product.id || product.product_id,
+              name: product.title || product.product_name,
+              price: parseFloat(product.price),
+              image: imgSrc
+            };
+            window.Cart.addToCart(cartProduct);
+          }
         }
         window.location.href = '/checkout';
         bsModal.hide();

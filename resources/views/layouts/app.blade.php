@@ -29,9 +29,6 @@
     <!-- Vite assets (enables HMR for CSS) -->
     @vite(['resources/css/app.css'])
     
-    <!-- App scripts (legacy, working) -->
-    <script src="{{ asset('js/toast.js') }}"></script>
-    
     <style>
         html, body {
             height: 100%;
@@ -42,11 +39,22 @@
         }
         .main-content {
             flex: 1 0 auto;
+            /* Reserve space for fixed header */
+            padding-top: 60px;
+            /* Massive overlap to kill the gap */
+            margin-top: -12px;
+            background-color: transparent;
         }
         footer {
             flex-shrink: 0;
         }
-        
+
+        /* Eliminate any navbar separators and shadows */
+        .navbar { 
+            border-bottom: 0 !important; 
+            box-shadow: none !important;
+        }
+
         /* Header hover effects */
         .navbar .nav-link:hover {
             color: #ffc107 !important;
@@ -77,13 +85,151 @@
         footer input::placeholder {
             color: rgba(255, 255, 255, 0.9) !important;
         }
+
+        /* Product modal image sizing */
+        #productViewModal .product-img {
+            max-width: 100%;
+            max-height: 70vh;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto;
+        }
+
+        #productViewModal .modal-dialog {
+            max-width: 920px;
+        }
+
+        #productViewModal .modal-content {
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 18px 60px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+        }
+
+        #productViewModal .modal-header {
+            background: linear-gradient(135deg, #0d47a1, #1565c0);
+            color: #fff;
+            padding: 18px 20px;
+            border: none;
+        }
+
+        #productViewModal .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+            opacity: 0.9;
+        }
+
+        #productViewModal .modal-body {
+            padding: 24px 28px;
+            background: #f9fafb;
+        }
+
+        #productViewModal #pvDesc {
+            font-size: 0.96rem;
+            color: #4b5563;
+        }
+
+        #productViewModal #pvPrice {
+            color: #1565c0;
+            font-weight: 800;
+            letter-spacing: -0.2px;
+        }
+
+        #productViewModal .modal-footer {
+            background: #ffffff;
+            border-top: 1px solid #e5e7eb;
+            padding: 16px 20px;
+            gap: 10px;
+        }
+
+        #productViewModal .modal-footer .btn-primary {
+            background: linear-gradient(135deg, #1565c0, #0d47a1);
+            border: none;
+            font-weight: 700;
+            padding: 10px 18px;
+            border-radius: 10px;
+            box-shadow: 0 8px 18px rgba(21, 101, 192, 0.25);
+        }
+
+        #productViewModal .modal-footer .btn-success {
+            background: linear-gradient(135deg, #ffc107, #ff9800);
+            border: none;
+            color: #222;
+            font-weight: 700;
+            padding: 10px 18px;
+            border-radius: 10px;
+            box-shadow: 0 8px 18px rgba(255, 193, 7, 0.25);
+        }
+
+        #productViewModal .modal-footer .btn-secondary {
+            background: #f3f4f6;
+            color: #1f2937;
+            border: 1px solid #e5e7eb;
+            font-weight: 600;
+            border-radius: 10px;
+        }
+
+        /* Back to top button */
+        #backToTop {
+            position: fixed;
+            right: 24px;
+            bottom: 28px;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, #ffc107, #ff9800);
+            box-shadow: 0 10px 24px rgba(255, 193, 7, 0.35);
+            color: #222;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+        }
+
+        #backToTop.show {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+
+        #backToTop:hover {
+            transform: translateY(-2px) scale(1.03);
+            box-shadow: 0 14px 28px rgba(255, 193, 7, 0.45);
+        }
+
+        /* Cart badge animation - BIG and NOTICEABLE */
+        @keyframes badgePop {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        #cartBadge.pop {
+            animation: badgePop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
     </style>
     
     @stack('styles')
 </head>
 <body>
     <!-- NAVBAR -->
-    <nav class="navbar navbar-expand-lg navbar-dark sticky-top" style="background: linear-gradient(135deg, #06131a 0%, #1a3a52 100%); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);">
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: linear-gradient(135deg, #06131a 0%, #1a3a52 100%); box-shadow: none !important; border-bottom: none !important;">
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="{{ route('home') }}" style="font-weight: 700; font-size: 1.4rem; letter-spacing: 0.5px;">
                 <i class="fas fa-microchip me-2" style="color: #ffc107;"></i>
@@ -100,9 +246,21 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link px-3 position-relative" href="{{ route('cart.index') }}" style="font-weight: 500; transition: all 0.3s ease;">
-                            <i class="fas fa-shopping-cart me-1"></i>Cart
+                        <a class="nav-link px-3" href="{{ route('products.index') }}" style="font-weight: 500; transition: all 0.3s ease;">
+                            <i class="fas fa-box me-1"></i>Products
                         </a>
+                    </li>
+                    <li class="nav-item">
+                        @auth
+                            <a class="nav-link px-3 position-relative" href="{{ route('cart.index') }}" style="font-weight: 500; transition: all 0.3s ease;">
+                                <i class="fas fa-shopping-cart me-1"></i>Cart
+                                <span id="cartBadge" style="position: absolute; top: -2px; right: 2px; color: #ffc107; font-size: 1rem; font-weight: bold; display: none; transform-origin: center;">5</span>
+                            </a>
+                        @else
+                            <a href="#" class="nav-link px-3 position-relative" onclick="event.preventDefault(); showLoginModal();" style="font-weight: 500; transition: all 0.3s ease;">
+                                <i class="fas fa-shopping-cart me-1"></i>Cart
+                            </a>
+                        @endauth
                     </li>
                     <li class="nav-item">
                         <a class="nav-link px-3" href="{{ route('contact.index') }}" style="font-weight: 500; transition: all 0.3s ease;">
@@ -148,6 +306,10 @@
         @yield('content')
     </div>
 
+    <button id="backToTop" aria-label="Back to top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
     <!-- FOOTER -->
     <footer class="text-white" style="background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);">
         <div class="container py-5">
@@ -183,6 +345,11 @@
                         <li class="mb-2">
                             <a href="{{ route('home') }}" class="text-decoration-none" style="transition: all 0.3s ease; font-size: 0.95rem; color: rgba(255, 255, 255, 0.8);">
                                 <i class="fas fa-chevron-right me-2" style="font-size: 0.7rem;"></i>Home
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="{{ route('products.index') }}" class="text-decoration-none" style="transition: all 0.3s ease; font-size: 0.95rem; color: rgba(255, 255, 255, 0.8);">
+                                <i class="fas fa-chevron-right me-2" style="font-size: 0.7rem;"></i>Products
                             </a>
                         </li>
                         <li class="mb-2">
@@ -285,6 +452,7 @@
     <script>
         // Expose auth state to frontend and provide helper to show login modal
         window.isAuthenticated = @json(Auth::check());
+        window.userId = @json(Auth::check() ? Auth::user()->id : null);
         function showLoginModal() {
             const el = document.getElementById('loginModal');
             if (el) {
@@ -296,6 +464,45 @@
             try { window.location.href = '{{ route('login') }}'; } catch(e) { window.location.href = '/login'; }
             return false;
         }
+
+        // Back to top behavior
+        (function() {
+            const btn = document.getElementById('backToTop');
+            if (!btn) return;
+            let lastY = window.scrollY;
+            let hideTimer;
+
+            const shouldShow = () => {
+                const y = window.scrollY;
+                const docH = document.documentElement.scrollHeight;
+                const winH = window.innerHeight;
+                const nearBottom = y + winH >= docH - 200;
+                const scrollingUp = y < lastY;
+                lastY = y;
+                return (y > 300 && scrollingUp) || nearBottom;
+            };
+
+            const scheduleHide = () => {
+                clearTimeout(hideTimer);
+                hideTimer = setTimeout(() => {
+                    btn.classList.remove('show');
+                }, 1200);
+            };
+
+            window.addEventListener('scroll', () => {
+                if (shouldShow()) {
+                    btn.classList.add('show');
+                    scheduleHide();
+                } else {
+                    btn.classList.remove('show');
+                }
+            });
+
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        })();
     </script>
 </body>
 </html>

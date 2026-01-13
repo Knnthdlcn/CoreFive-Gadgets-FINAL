@@ -61,9 +61,6 @@
       }
       if (window.Cart && window.Cart.addToCart) {
         window.Cart.addToCart(product);
-        if (window.Toast && window.Toast.show) {
-          window.Toast.show(product.title + ' added to cart');
-        }
         bsModal.hide();
       }
     };
@@ -132,9 +129,6 @@
           }
           if (window.Cart && window.Cart.addToCart) {
             window.Cart.addToCart(product);
-            if (window.Toast && window.Toast.show) {
-              window.Toast.show(product.title + ' added to cart');
-            }
           }
         });
       }
