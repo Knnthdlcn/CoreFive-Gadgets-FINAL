@@ -50,6 +50,18 @@ Route::get('/email/verify', [EmailVerificationOtpController::class, 'notice'])
     ->middleware('auth')
     ->name('verification.notice');
 
+// Email verification (OTP) for guests (e.g., Forgot Password flow)
+Route::get('/email/verify-guest', [EmailVerificationOtpController::class, 'guestNotice'])
+    ->name('verification.guest.notice');
+
+Route::post('/email/verification-notification-guest', [EmailVerificationOtpController::class, 'guestSend'])
+    ->middleware(['throttle:6,1'])
+    ->name('verification.guest.send');
+
+Route::post('/email/verify-otp-guest', [EmailVerificationOtpController::class, 'guestVerify'])
+    ->middleware(['throttle:10,1'])
+    ->name('verification.guest.verify');
+
 Route::post('/email/verification-notification', [EmailVerificationOtpController::class, 'send'])
     ->middleware(['auth', 'throttle:6,1'])
     ->name('verification.send');

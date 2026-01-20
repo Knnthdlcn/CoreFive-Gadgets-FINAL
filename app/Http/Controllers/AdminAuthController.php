@@ -58,8 +58,9 @@ class AdminAuthController extends Controller
     public function logout(Request $request)
     {
         Auth::guard('admin')->logout();
-        
-        $request->session()->invalidate();
+
+        // Do NOT invalidate the whole session, otherwise the web guard session
+        // in the same browser will also be destroyed.
         $request->session()->regenerateToken();
         
         return redirect()->route('admin.login')->with('success', 'You have been logged out successfully');

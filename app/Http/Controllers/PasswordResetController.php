@@ -45,9 +45,12 @@ class PasswordResetController extends Controller
         if (method_exists($user, 'hasVerifiedEmail') && !$user->hasVerifiedEmail()) {
             app(EmailVerificationOtpService::class)->send($user, true);
 
-            return back()->withErrors([
-                'email' => 'Please verify your email first. We sent you a 6-digit verification code.',
-            ]);
+            // IMPORTANT: user is not logged in during password reset.
+            // Redirect them to a guest OTP page where they can actually enter the code.
+            return redirect()->route('verification.guest.notice', [
+                'email' => $user->email,
+                'next' => 'password-reset',
+            ])->with('status', 'verification-code-sent');
         }
 
         // If the mailer is set to "log" (common in local dev), Laravel will not send real emails.

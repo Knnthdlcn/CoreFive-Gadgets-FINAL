@@ -33,7 +33,7 @@
                     <div class="mb-2">
                         <label for="loginPassword" class="form-label" style="font-weight: 600; color: #222; font-size: 0.95rem; margin-bottom: 8px;">Password</label>
                         <div style="position: relative;">
-                            <input type="password" class="form-control" id="loginPassword" name="password" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px 16px; font-size: 0.95rem; transition: all 0.3s ease;" placeholder="••••••••">
+                            <input type="password" class="form-control" id="loginPassword" name="password" autocomplete="current-password" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px 16px; font-size: 0.95rem; transition: all 0.3s ease;" placeholder="••••••••">
                             <button type="button" class="btn" id="togglePassword" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #666; cursor: pointer; padding: 0;">
                                 <i class="fas fa-eye"></i>
                             </button>
@@ -83,7 +83,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" style="opacity: 0.7;"></button>
             </div>
             
-            <form id="signupForm">
+            <form id="signupForm" autocomplete="off">
                 @csrf
                 <div class="modal-body" style="padding: 28px;">
                     <!-- Error Alert -->
@@ -120,7 +120,7 @@
                     <!-- Email Field -->
                     <div class="mb-4">
                         <label for="signupEmail" class="form-label" style="font-weight: 600; color: #222; font-size: 0.95rem; margin-bottom: 8px;">Email Address</label>
-                        <input type="email" class="form-control" id="signupEmail" name="email" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px 16px; font-size: 0.95rem; transition: all 0.3s ease;" placeholder="you@example.com">
+                        <input type="email" class="form-control" id="signupEmail" name="email" autocomplete="username" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px 16px; font-size: 0.95rem; transition: all 0.3s ease;" placeholder="you@example.com">
                         <small style="color: #999; display: block; margin-top: 6px;">We'll use this to verify your account</small>
                     </div>
 
@@ -128,7 +128,7 @@
                     <div class="mb-4">
                         <label for="signupPassword" class="form-label" style="font-weight: 600; color: #222; font-size: 0.95rem; margin-bottom: 8px;">Password</label>
                         <div style="position: relative;">
-                            <input type="password" class="form-control" id="signupPassword" name="password" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px 16px; font-size: 0.95rem; transition: all 0.3s ease;" placeholder="••••••••">
+                            <input type="password" class="form-control" id="signupPassword" name="password" autocomplete="new-password" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px 16px; font-size: 0.95rem; transition: all 0.3s ease;" placeholder="••••••••">
                             <button type="button" class="btn" id="toggleSignupPassword" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #666; cursor: pointer; padding: 0;">
                                 <i class="fas fa-eye"></i>
                             </button>
@@ -147,7 +147,7 @@
                     <div class="mb-4">
                         <label for="signupPasswordConfirm" class="form-label" style="font-weight: 600; color: #222; font-size: 0.95rem; margin-bottom: 8px;">Confirm Password</label>
                         <div style="position: relative;">
-                            <input type="password" class="form-control" id="signupPasswordConfirm" name="password_confirmation" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px 16px; font-size: 0.95rem; transition: all 0.3s ease;" placeholder="••••••••">
+                            <input type="password" class="form-control" id="signupPasswordConfirm" name="password_confirmation" autocomplete="new-password" style="border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px 16px; font-size: 0.95rem; transition: all 0.3s ease;" placeholder="••••••••">
                             <button type="button" class="btn" id="toggleSignupPasswordConfirm" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: #666; cursor: pointer; padding: 0;">
                                 <i class="fas fa-eye"></i>
                             </button>
@@ -247,6 +247,28 @@ function switchToSignup(e) {
     const signupModal = new bootstrap.Modal(document.getElementById('signupModal'));
     signupModal.show();
 }
+
+// Prevent password fields from carrying over between accounts/modal opens
+document.getElementById('signupModal')?.addEventListener('shown.bs.modal', () => {
+    const pw = document.getElementById('signupPassword');
+    const pw2 = document.getElementById('signupPasswordConfirm');
+    if (pw) pw.value = '';
+    if (pw2) pw2.value = '';
+
+    // Reset strength/match UI (if visible)
+    const strengthDiv = document.getElementById('passwordStrength');
+    const strengthBar = document.getElementById('passwordStrengthBar');
+    const strengthText = document.getElementById('passwordStrengthText');
+    const matchDiv = document.getElementById('passwordMatch');
+
+    if (strengthDiv) strengthDiv.style.display = 'none';
+    if (strengthBar) strengthBar.style.width = '0%';
+    if (strengthText) strengthText.textContent = 'Weak password';
+    if (matchDiv) {
+        matchDiv.style.display = 'none';
+        matchDiv.textContent = '';
+    }
+});
 
 document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();

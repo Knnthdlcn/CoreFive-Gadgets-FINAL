@@ -11,6 +11,8 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 use Illuminate\Auth\Middleware\EnsureEmailIsVerified;
+use Illuminate\Http\Request;
+use Illuminate\Http\Exceptions\PostTooLargeException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -37,5 +39,16 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (PostTooLargeException $e, Request $request) {
+            // Happens before Laravel can validate; show a friendly UI message.
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Upload too large. Maximum allowed is 5MB.',
+                ], 413);
+            }
+
+            return response()->view('errors.413', [
+                'message' => 'Upload too large. Maximum allowed is 5MB.',
+            ], 413);
+        });
     })->create();

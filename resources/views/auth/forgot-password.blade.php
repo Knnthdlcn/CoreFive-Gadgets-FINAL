@@ -35,6 +35,13 @@
                             Send OTP Code
                         </button>
 
+                        <div class="text-center mt-3" style="font-size: 0.95rem;">
+                            <a
+                                href="{{ route('verification.guest.notice', ['email' => old('email', request('email')), 'next' => 'password-reset']) }}"
+                                style="text-decoration:none; font-weight: 700; color: #1565c0;"
+                            >Already have a verification code?</a>
+                        </div>
+
                         <div class="text-center mt-3">
                             <a href="{{ route('home') }}" style="text-decoration:none; font-weight: 700; color: #1565c0;">Back to Home</a>
                         </div>

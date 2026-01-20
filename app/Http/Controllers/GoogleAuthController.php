@@ -102,14 +102,13 @@ class GoogleAuthController extends Controller
                 ->with('error', 'Your account has been temporarily disabled (banned). Please contact Customer Service for help.');
         }
 
-        // Keep admin and web sessions separated.
+        // Allow admin + web sessions to coexist in the same browser.
+        // We do not force-log-out the other guard here.
         if (($user->role ?? 'customer') === 'admin') {
-            Auth::guard('web')->logout();
             Auth::guard('admin')->login($user, true);
             return redirect()->intended(route('admin.dashboard'));
         }
 
-        Auth::guard('admin')->logout();
         Auth::guard('web')->login($user, true);
 
         return redirect()->intended(route('home'));

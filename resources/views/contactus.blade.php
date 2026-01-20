@@ -33,6 +33,22 @@
                                 </div>
                             </div>
 
+                            <!-- Error Message Alert -->
+                            <div id="errorAlert" style="display: none; margin-bottom: 18px; padding: 16px; background: linear-gradient(135deg, #f8d7da 0%, #f1b0b7 100%); border-left: 4px solid #dc3545; border-radius: 10px; animation: slideDown 0.4s ease;">
+                                <div style="display: flex; align-items: flex-start; gap: 10px;">
+                                    <div style="width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                                        <i class="fas fa-exclamation-triangle" style="color: #dc3545; font-size: 1.15rem;"></i>
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <h5 style="color: #7f1d1d; font-weight: 700; margin: 0 0 6px 0;">Message Not Sent</h5>
+                                        <p id="errorAlertText" style="color: #7f1d1d; margin: 0; font-size: 0.92rem; line-height: 1.5;">Error sending message. Please try again.</p>
+                                    </div>
+                                    <button type="button" onclick="document.getElementById('errorAlert').style.display='none'" style="background: none; border: none; color: #7f1d1d; font-size: 1.05rem; cursor: pointer; padding: 0; width: 22px; height: 22px; flex-shrink: 0;">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+
                             <h3 class="mb-3" style="font-weight: 700; color: #2c3e50;">Send us a Message</h3>
                             <form id="contactForm" novalidate>
                                 @csrf
@@ -228,6 +244,12 @@
                     if (!isValid) {
                         return;
                     }
+
+                    const successAlert = document.getElementById('successAlert');
+                    const errorAlert = document.getElementById('errorAlert');
+                    const errorAlertText = document.getElementById('errorAlertText');
+                    if (successAlert) successAlert.style.display = 'none';
+                    if (errorAlert) errorAlert.style.display = 'none';
                 
                     const formData = new FormData(e.target);
                     try {
@@ -255,10 +277,31 @@
                                 }
                             }, 8000);
                         } else {
-                            alert('Error sending message. Please try again.');
+                            let message = 'Error sending message. Please try again.';
+                            try {
+                                const data = await response.json();
+                                if (data?.message) message = data.message;
+                                if (data?.errors) {
+                                    const firstKey = Object.keys(data.errors)[0];
+                                    const firstErr = firstKey ? data.errors[firstKey]?.[0] : null;
+                                    if (firstErr) message = firstErr;
+                                }
+                            } catch (_) {
+                                // ignore JSON parse issues
+                            }
+
+                            if (errorAlertText) errorAlertText.textContent = message;
+                            if (errorAlert) {
+                                errorAlert.style.display = 'block';
+                                errorAlert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                            }
                         }
                     } catch (error) {
-                        alert('Error sending message. Please try again.');
+                        if (errorAlertText) errorAlertText.textContent = 'Error sending message. Please try again.';
+                        if (errorAlert) {
+                            errorAlert.style.display = 'block';
+                            errorAlert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }
                     }
                 });
             
@@ -282,5 +325,4 @@
                     }
                 });
             </script>
-        </script>
 @endsection

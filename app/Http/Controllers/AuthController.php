@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\URL;
 use App\Services\EmailVerificationOtpService;
+use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
 {
@@ -178,9 +179,9 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::logout();
-        Auth::guard('admin')->logout();
-        $request->session()->invalidate();
+        // Only log out the web user. Do NOT invalidate the whole session,
+        // otherwise an active admin session in the same browser is also destroyed.
+        Auth::guard('web')->logout();
         $request->session()->regenerateToken();
 
         return redirect()->route('home')->with('success', 'Logged out successfully!');
@@ -281,25 +282,52 @@ class AuthController extends Controller
 
     public function updatePhoto(Request $request)
     {
-        $validated = $request->validate([
-            'profile_photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+        try {
+            $validated = $request->validate([
+                // max is in kilobytes
+                'profile_photo' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
+            ]);
 
-        // Delete old photo if exists
-        if (Auth::user()->profile_photo) {
-            $oldPhotoPath = storage_path('app/public/' . Auth::user()->profile_photo);
-            if (file_exists($oldPhotoPath)) {
-                unlink($oldPhotoPath);
+            // Ensure target directory exists
+            Storage::disk('public')->makeDirectory('profile_photos');
+
+            // Delete old photo if exists
+            if (Auth::user()->profile_photo) {
+                Storage::disk('public')->delete(Auth::user()->profile_photo);
             }
+
+            // Store new photo
+            $path = $request->file('profile_photo')->store('profile_photos', 'public');
+
+            Auth::user()->update([
+                'profile_photo' => $path
+            ]);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'profile_photo' => $path,
+                    'profile_photo_url' => asset('storage/' . $path),
+                    'message' => 'Profile photo updated successfully!',
+                ]);
+            }
+
+            return redirect()->route('profile')->with('success', 'Profile photo updated successfully!');
+        } catch (\Throwable $e) {
+            Log::warning('Profile photo upload failed', [
+                'exception' => get_class($e),
+                'message' => $e->getMessage(),
+                'user_id' => Auth::id(),
+            ]);
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'The profile photo failed to upload.',
+                ], 422);
+            }
+
+            return redirect()->route('profile')->withErrors([
+                'profile_photo' => 'The profile photo failed to upload.',
+            ]);
         }
-
-        // Store new photo
-        $path = $request->file('profile_photo')->store('profile_photos', 'public');
-
-        Auth::user()->update([
-            'profile_photo' => $path
-        ]);
-
-        return redirect()->route('profile')->with('success', 'Profile photo updated successfully!');
     }
 }
