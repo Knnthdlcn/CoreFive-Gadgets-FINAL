@@ -204,7 +204,7 @@
                         <div style="display: flex; align-items: flex-start; gap: 10px;">
                             <input type="checkbox" id="agreeTerms" name="agreeTerms" style="margin-top: 4px; cursor: pointer;">
                             <label for="agreeTerms" style="color: #666; font-size: 0.9rem; margin: 0; cursor: pointer;">
-                                I agree to the <a href="#" style="color: #1565c0; text-decoration: none;">Terms & Conditions</a> and <a href="#" style="color: #1565c0; text-decoration: none;">Privacy Policy</a>
+                                I agree to the <a href="{{ route('pages.terms') }}" style="color: #1565c0; text-decoration: none;">Terms & Conditions</a> and <a href="{{ route('pages.privacy') }}" style="color: #1565c0; text-decoration: none;">Privacy Policy</a>
                             </label>
                         </div>
                     </div>

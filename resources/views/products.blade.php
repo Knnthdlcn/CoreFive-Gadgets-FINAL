@@ -317,11 +317,12 @@
                 fetch('{{ route("cart.get") }}')
                     .then(response => response.json())
                     .then(data => {
-                        const cartBadge = document.getElementById('cartCount');
-                        if (cartBadge && data.cart_count !== undefined) {
-                            cartBadge.textContent = data.cart_count;
-                            cartBadge.style.display = data.cart_count > 0 ? 'inline-block' : 'none';
-                        }
+                        if (data.cart_count === undefined) return;
+                        const count = Number(data.cart_count) || 0;
+                        document.querySelectorAll('[data-cart-count-badge]').forEach((badge) => {
+                            badge.textContent = String(count);
+                            badge.style.display = count > 0 ? 'inline-block' : 'none';
+                        });
                     });
             }
         </script>

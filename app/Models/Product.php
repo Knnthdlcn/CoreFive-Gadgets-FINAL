@@ -16,6 +16,7 @@ class Product extends Model
         'price',
         'image_path',
         'category',
+        'is_featured',
         'stock',
         'stock_unlimited',
         'stock_updated_at',
@@ -26,6 +27,7 @@ class Product extends Model
     protected $appends = ['image_url', 'has_variants', 'price_range'];
 
     protected $casts = [
+        'is_featured' => 'boolean',
         'stock_unlimited' => 'boolean',
         'stock_updated_at' => 'datetime',
     ];

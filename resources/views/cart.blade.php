@@ -30,6 +30,14 @@
             <div class="col-lg-8 mb-4">
                 <div class="card border-0 shadow-sm" style="border-radius: 12px;">
                     <div class="card-body" style="padding: 24px;">
+                        <div class="d-flex align-items-center justify-content-between mb-3" style="gap: 12px;">
+                            <label class="d-flex align-items-center" style="gap: 10px; cursor: pointer; user-select: none;">
+                                <input id="cartSelectAll" type="checkbox" class="form-check-input" style="width: 22px; height: 22px; border-radius: 6px; accent-color: #ff6a00; cursor: pointer;">
+                                <span style="font-weight: 700; color: #2c3e50;">Select all</span>
+                            </label>
+                            <span class="small text-muted" id="cartSelectAllHint"></span>
+                        </div>
+
                         <div class="cart-items">
                             @foreach($cartItems as $item)
                                 @php
@@ -246,9 +254,32 @@
     @push('scripts')
     <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const selectAllEl = document.getElementById('cartSelectAll');
+        const selectAllHintEl = document.getElementById('cartSelectAllHint');
+
         function formatMoney(n) {
             const num = Number(n) || 0;
             return '₱' + num.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function syncSelectAllState() {
+            if (!selectAllEl) return;
+            const checkboxes = Array.from(document.querySelectorAll('.cart-select-item'));
+            if (checkboxes.length === 0) {
+                selectAllEl.checked = false;
+                selectAllEl.indeterminate = false;
+                selectAllEl.disabled = true;
+                if (selectAllHintEl) selectAllHintEl.textContent = '';
+                return;
+            }
+
+            const checkedCount = checkboxes.filter(cb => cb.checked).length;
+            selectAllEl.disabled = false;
+            selectAllEl.checked = checkedCount === checkboxes.length;
+            selectAllEl.indeterminate = checkedCount > 0 && checkedCount < checkboxes.length;
+            if (selectAllHintEl) {
+                selectAllHintEl.textContent = checkedCount > 0 ? (checkedCount + ' selected') : '';
+            }
         }
 
         function recalcSelectedSummary() {
@@ -279,11 +310,24 @@
             if (errEl) {
                 errEl.style.display = 'none';
             }
+
+            syncSelectAllState();
         }
 
         document.querySelectorAll('.cart-select-item').forEach(cb => {
             cb.addEventListener('change', recalcSelectedSummary);
         });
+
+        if (selectAllEl) {
+            selectAllEl.addEventListener('change', function() {
+                const shouldSelect = Boolean(selectAllEl.checked);
+                document.querySelectorAll('.cart-select-item').forEach(cb => {
+                    cb.checked = shouldSelect;
+                });
+                selectAllEl.indeterminate = false;
+                recalcSelectedSummary();
+            });
+        }
 
         const checkoutForm = document.getElementById('cartCheckoutForm');
         if (checkoutForm) {

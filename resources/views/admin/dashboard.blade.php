@@ -102,7 +102,7 @@
                             <tbody>
                                 @foreach($recent_orders as $order)
                                     <tr>
-                                        <td><a href="{{ route('admin.orders.show', $order) }}" style="text-decoration: none; color: #1565c0; font-weight: 600;">#{{ $order->id }}</a></td>
+                                        <td><a href="{{ route('admin.orders.show', $order) }}" style="text-decoration: none; color: #1565c0; font-weight: 600;">{{ $order->display_order_number }}</a></td>
                                         <td>{{ $order->user->first_name }} {{ $order->user->last_name }}</td>
                                         <td>₱{{ number_format($order->total, 2) }}</td>
                                         <td>

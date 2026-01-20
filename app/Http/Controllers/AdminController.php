@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Order;
+use App\Models\OrderReturn;
+use App\Models\OrderShippingUpdate;
 use App\Models\User;
 use App\Models\Contact;
 use App\Models\Category;
@@ -92,6 +94,7 @@ class AdminController extends Controller
     public function indexProducts(Request $request)
     {
         $selectedCategory = (string) $request->query('category', '');
+        $onlyFeatured = (bool) $request->boolean('featured');
         $search = trim((string) $request->query('q', ''));
         $searchEscaped = addcslashes($search, "\\%_");
         $searchId = ctype_digit($search) ? (int) $search : null;
@@ -110,6 +113,9 @@ class AdminController extends Controller
             ->when($selectedCategory !== '', function ($q) use ($selectedCategory) {
                 return $q->where('category', $selectedCategory);
             })
+            ->when($onlyFeatured, function ($q) {
+                return $q->where('is_featured', true);
+            })
             ->when($search !== '', function ($q) use ($searchEscaped, $searchId) {
                 return $q->where(function ($sub) use ($searchEscaped, $searchId) {
                     $like = '%' . $searchEscaped . '%';
@@ -125,7 +131,7 @@ class AdminController extends Controller
 
         $products = $query->paginate(15)->appends($request->query());
 
-        return view('admin.products.index', compact('products', 'categories', 'selectedCategory'));
+        return view('admin.products.index', compact('products', 'categories', 'selectedCategory', 'onlyFeatured'));
     }
 
     /**
@@ -150,6 +156,7 @@ class AdminController extends Controller
             'price' => 'required|numeric|min:0',
             'category' => 'required|string|in:' . implode(',', $categoryNames),
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'is_featured' => 'sometimes|boolean',
             'stock_unlimited' => 'sometimes|boolean',
             'stock' => 'nullable|integer|min:0',
         ]);
@@ -166,6 +173,7 @@ class AdminController extends Controller
         $validated['stock_unlimited'] = $unlimited;
         $validated['stock'] = $unlimited ? (int) ($validated['stock'] ?? 0) : max(0, (int) ($validated['stock'] ?? 0));
         $validated['stock_updated_at'] = now();
+        $validated['is_featured'] = $request->boolean('is_featured');
 
         Product::create($validated);
 
@@ -204,6 +212,7 @@ class AdminController extends Controller
             'price' => 'required|numeric|min:0',
             'category' => 'nullable|string|in:' . implode(',', $categoryNames),
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'is_featured' => 'sometimes|boolean',
             'stock_unlimited' => 'sometimes|boolean',
             'stock' => 'nullable|integer|min:0',
         ]);
@@ -217,6 +226,7 @@ class AdminController extends Controller
         unset($validated['image']);
 
         $unlimited = $request->boolean('stock_unlimited');
+        $validated['is_featured'] = $request->boolean('is_featured');
         $stockQty = array_key_exists('stock', $validated) ? $validated['stock'] : null;
         unset($validated['stock_unlimited'], $validated['stock']);
 
@@ -410,7 +420,7 @@ class AdminController extends Controller
     public function indexOrders(Request $request)
     {
         $status = (string) $request->query('status', '');
-        $allowedStatuses = ['pending', 'processing', 'shipped', 'completed', 'cancelled'];
+        $allowedStatuses = ['pending', 'processing', 'shipped', 'delivered', 'completed', 'cancelled'];
 
         $ordersQuery = Order::with('user')->latest('created_at');
         if ($status !== '' && in_array($status, $allowedStatuses, true)) {
@@ -426,7 +436,7 @@ class AdminController extends Controller
      */
     public function showOrder(Order $order)
     {
-        $order->load('user', 'items.product');
+        $order->load('user', 'items.product', 'shippingUpdates');
         return view('admin.orders.show', compact('order'));
     }
 
@@ -436,13 +446,113 @@ class AdminController extends Controller
     public function updateOrderStatus(Request $request, Order $order)
     {
         $validated = $request->validate([
-            'status' => 'required|string|in:pending,processing,shipped,completed,cancelled',
+            'status' => 'required|string|in:pending,processing,shipped,delivered,completed,cancelled',
         ]);
+
+        $next = (string) $validated['status'];
+        if ($next === 'delivered' && !$order->delivered_at) {
+            $validated['delivered_at'] = now();
+        }
+        if ($next === 'completed' && !$order->completed_at) {
+            $validated['completed_at'] = now();
+        }
 
         $order->update($validated);
 
+        // Best-effort: create a matching shipping update for major status changes.
+        if (in_array($next, ['processing', 'shipped', 'delivered'], true)) {
+            OrderShippingUpdate::create([
+                'order_id' => $order->id,
+                'admin_user_id' => auth('admin')->id() ?? auth()->id(),
+                'status' => $next,
+                'location' => null,
+                'message' => $next === 'processing'
+                    ? 'Order is being processed'
+                    : ($next === 'shipped' ? 'Order has shipped' : 'Order delivered'),
+                'occurred_at' => now(),
+            ]);
+        }
+
         return redirect()->back()
             ->with('success', 'Order status updated successfully!');
+    }
+
+    public function storeOrderShippingUpdate(Request $request, Order $order)
+    {
+        $validated = $request->validate([
+            'status' => 'required|string|max:40',
+            'message' => 'required|string|max:255',
+            'location' => 'nullable|string|max:120',
+            'occurred_at' => 'nullable|date',
+        ]);
+
+        $occurredAt = !empty($validated['occurred_at']) ? $validated['occurred_at'] : now();
+
+        OrderShippingUpdate::create([
+            'order_id' => $order->id,
+            'admin_user_id' => auth('admin')->id() ?? auth()->id(),
+            'status' => (string) $validated['status'],
+            'location' => $validated['location'] ?? null,
+            'message' => (string) $validated['message'],
+            'occurred_at' => $occurredAt,
+        ]);
+
+        // If admin posts a delivered update, set order delivered.
+        if ((string) $validated['status'] === 'delivered') {
+            if ((string) $order->status !== 'completed') {
+                $order->status = 'delivered';
+            }
+            if (!$order->delivered_at) {
+                $order->delivered_at = now();
+            }
+            $order->save();
+        }
+
+        return redirect()->back()->with('success', 'Shipping update added.');
+    }
+
+    public function indexReturns(Request $request)
+    {
+        $status = (string) $request->query('status', '');
+        $query = OrderReturn::with(['order.user'])
+            ->latest('created_at');
+
+        if ($status !== '') {
+            $query->where('status', $status);
+        }
+
+        $returns = $query->paginate(15)->appends($request->query());
+        return view('admin.returns.index', compact('returns', 'status'));
+    }
+
+    public function showReturn(OrderReturn $orderReturn)
+    {
+        $orderReturn->load(['order.user', 'items.orderItem.product']);
+        return view('admin.returns.show', compact('orderReturn'));
+    }
+
+    public function updateReturnStatus(Request $request, OrderReturn $orderReturn)
+    {
+        $validated = $request->validate([
+            'status' => 'required|string|in:requested,approved,rejected,in_transit,received,closed',
+        ]);
+
+        $next = (string) $validated['status'];
+        $patch = ['status' => $next];
+        if ($next === 'approved' && !$orderReturn->approved_at) {
+            $patch['approved_at'] = now();
+        }
+        if ($next === 'rejected' && !$orderReturn->rejected_at) {
+            $patch['rejected_at'] = now();
+            $patch['closed_at'] = $orderReturn->closed_at ?? now();
+        }
+        if ($next === 'closed' && !$orderReturn->closed_at) {
+            $patch['closed_at'] = now();
+        }
+
+        $orderReturn->update($patch);
+
+        return redirect()->back()->with('success', 'Return status updated.');
     }
 
     /**

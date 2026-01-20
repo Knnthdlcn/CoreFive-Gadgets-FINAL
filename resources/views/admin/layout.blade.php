@@ -319,6 +319,11 @@
                     <span>Orders</span>
                 </a>
 
+                <a href="{{ route('admin.returns.index') }}" class="nav-link {{ request()->routeIs('admin.returns.*') ? 'active' : '' }}">
+                    <i class="fas fa-rotate-left"></i>
+                    <span>Returns</span>
+                </a>
+
                 <a href="{{ route('admin.contacts.index') }}" class="nav-link {{ request()->routeIs('admin.contacts.*') ? 'active' : '' }}">
                     <i class="fas fa-envelope"></i>
                     <span>Contacts</span>

@@ -419,7 +419,11 @@
 
                 <a href="{{ route('cart.index') }}" class="icon-btn" aria-label="Cart">
                     <i class="fas fa-cart-shopping"></i>
-                    <span class="badge bg-white text-dark" style="position:absolute; top:-6px; right:-6px; font-size: 0.68rem; border-radius: 999px; {{ $cartCountMobile > 0 ? '' : 'display:none;' }}">{{ $cartCountMobile }}</span>
+                    <span
+                        class="badge bg-white text-dark"
+                        data-cart-count-badge
+                        style="position:absolute; top:-6px; right:-6px; font-size: 0.68rem; border-radius: 999px; {{ $cartCountMobile > 0 ? '' : 'display:none;' }}"
+                    >{{ $cartCountMobile }}</span>
                 </a>
 
                 @auth
@@ -482,7 +486,7 @@
                                     $cartCount = count(session()->get('cart', []));
                                 }
                             @endphp
-                            <span id="cartCount" class="badge bg-warning text-dark" style="position: absolute; top: 0px; right: 8px; font-size: 0.7rem; {{ $cartCount > 0 ? '' : 'display: none;' }}">{{ $cartCount }}</span>
+                            <span id="cartCount" class="badge bg-warning text-dark" data-cart-count-badge style="position: absolute; top: 0px; right: 8px; font-size: 0.7rem; {{ $cartCount > 0 ? '' : 'display: none;' }}">{{ $cartCount }}</span>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -546,8 +550,13 @@
                     <i class="fas fa-box nav-ico"></i>
                     <span>Products</span>
                 </a>
-                <a href="{{ route('cart.index') }}" class="d-flex flex-column align-items-center {{ request()->routeIs('cart.*') ? 'active' : '' }}">
+                <a href="{{ route('cart.index') }}" class="d-flex flex-column align-items-center position-relative {{ request()->routeIs('cart.*') ? 'active' : '' }}">
                     <i class="fas fa-cart-shopping nav-ico"></i>
+                    <span
+                        class="badge bg-warning text-dark"
+                        data-cart-count-badge
+                        style="position:absolute; top:-2px; right: 22px; font-size: 0.62rem; border-radius: 999px; {{ ($cartCountMobile ?? 0) > 0 ? '' : 'display:none;' }}"
+                    >{{ $cartCountMobile ?? 0 }}</span>
                     <span>Cart</span>
                 </a>
                 <a href="{{ route('orders.index') }}" class="d-flex flex-column align-items-center {{ request()->routeIs('orders.*') ? 'active' : '' }}">
@@ -640,27 +649,27 @@
                     <h5 class="mb-3" style="font-weight: 700; color: #ffc107;">Customer Service</h5>
                     <ul class="list-unstyled">
                         <li class="mb-2">
-                            <a href="#" class="text-decoration-none" style="transition: all 0.3s ease; font-size: 0.95rem; color: rgba(255, 255, 255, 0.8);">
+                            <a href="{{ route('pages.shipping') }}" class="text-decoration-none" style="transition: all 0.3s ease; font-size: 0.95rem; color: rgba(255, 255, 255, 0.8);">
                                 <i class="fas fa-chevron-right me-2" style="font-size: 0.7rem;"></i>Shipping & Delivery
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="#" class="text-decoration-none" style="transition: all 0.3s ease; font-size: 0.95rem; color: rgba(255, 255, 255, 0.8);">
+                            <a href="{{ route('pages.returns') }}" class="text-decoration-none" style="transition: all 0.3s ease; font-size: 0.95rem; color: rgba(255, 255, 255, 0.8);">
                                 <i class="fas fa-chevron-right me-2" style="font-size: 0.7rem;"></i>Returns & Refunds
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="#" class="text-decoration-none" style="transition: all 0.3s ease; font-size: 0.95rem; color: rgba(255, 255, 255, 0.8);">
+                            <a href="{{ route('pages.faqs') }}" class="text-decoration-none" style="transition: all 0.3s ease; font-size: 0.95rem; color: rgba(255, 255, 255, 0.8);">
                                 <i class="fas fa-chevron-right me-2" style="font-size: 0.7rem;"></i>FAQs
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="#" class="text-decoration-none" style="transition: all 0.3s ease; font-size: 0.95rem; color: rgba(255, 255, 255, 0.8);">
+                            <a href="{{ route('pages.privacy') }}" class="text-decoration-none" style="transition: all 0.3s ease; font-size: 0.95rem; color: rgba(255, 255, 255, 0.8);">
                                 <i class="fas fa-chevron-right me-2" style="font-size: 0.7rem;"></i>Privacy Policy
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="#" class="text-decoration-none" style="transition: all 0.3s ease; font-size: 0.95rem; color: rgba(255, 255, 255, 0.8);">
+                            <a href="{{ route('pages.terms') }}" class="text-decoration-none" style="transition: all 0.3s ease; font-size: 0.95rem; color: rgba(255, 255, 255, 0.8);">
                                 <i class="fas fa-chevron-right me-2" style="font-size: 0.7rem;"></i>Terms & Conditions
                             </a>
                         </li>
@@ -671,13 +680,28 @@
                 <div class="col-lg-3 col-md-6 mb-4">
                     <h5 class="mb-3" style="font-weight: 700; color: #ffc107;">Join Our Newsletter</h5>
                     <p class="mb-3" style="font-size: 0.9rem; color: rgba(255, 255, 255, 0.8);">Get product launches and exclusive offers — 1 email a week.</p>
-                    <form action="#" method="POST" class="d-flex gap-2">
+                    <form id="footerNewsletterForm" action="{{ route('newsletter.subscribe') }}" method="POST" class="d-flex gap-2" novalidate>
                         @csrf
-                        <input type="email" name="email" class="form-control" placeholder="you@gmail.com" required style="border-radius: 8px; border: 1px solid #495057; background: rgba(255,255,255,0.1); color: white !important; font-size: 0.9rem;">
+                        <input
+                            id="footerNewsletterEmail"
+                            type="email"
+                            name="newsletter_email"
+                            value="{{ old('newsletter_email') }}"
+                            class="form-control {{ $errors->has('newsletter_email') ? 'is-invalid' : '' }}"
+                            placeholder="you@gmail.com"
+                            autocomplete="email"
+                            inputmode="email"
+                            style="border-radius: 8px; border: 1px solid #495057; background: rgba(255,255,255,0.1); color: white !important; font-size: 0.9rem;"
+                        >
                         <button type="submit" class="btn px-3" style="background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); border: none; color: #222; font-weight: 600; border-radius: 8px; white-space: nowrap;">
                             Subscribe
                         </button>
                     </form>
+                    @if(session('newsletter_success'))
+                        <div class="mt-2" style="font-size: 0.85rem; color: rgba(40, 167, 69, 0.95); font-weight: 700;">
+                            {{ session('newsletter_success') }}
+                        </div>
+                    @endif
                     <div class="mt-4">
                         <p class="mb-2" style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.8);"><i class="fas fa-envelope me-2"></i>support@corefivegadgets.com</p>
                         <p class="mb-0" style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.8);"><i class="fas fa-phone me-2"></i>+1 (555) 123-4567</p>
@@ -727,6 +751,44 @@
             try { window.location.href = '{{ route('login') }}'; } catch(e) { window.location.href = '/login'; }
             return false;
         }
+
+        // Footer newsletter: disable browser tooltip and highlight red instead
+        (function () {
+            const form = document.getElementById('footerNewsletterForm');
+            const input = document.getElementById('footerNewsletterEmail');
+            if (!form || !input) return;
+
+            const setInvalid = (isInvalid) => {
+                if (isInvalid) {
+                    input.classList.add('is-invalid');
+                    input.style.borderColor = '#dc3545';
+                    input.style.boxShadow = '0 0 0 .2rem rgba(220,53,69,.25)';
+                } else {
+                    input.classList.remove('is-invalid');
+                    input.style.borderColor = '';
+                    input.style.boxShadow = '';
+                }
+            };
+
+            input.addEventListener('input', () => setInvalid(false));
+
+            form.addEventListener('submit', (e) => {
+                const email = (input.value || '').trim();
+                if (!email) {
+                    e.preventDefault();
+                    setInvalid(true);
+                    input.focus();
+                    return;
+                }
+                // Basic email check (server will still validate)
+                const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+                if (!ok) {
+                    e.preventDefault();
+                    setInvalid(true);
+                    input.focus();
+                }
+            });
+        })();
 
         // Back to top behavior
         (function() {

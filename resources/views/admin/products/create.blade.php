@@ -80,6 +80,20 @@
                                 @enderror
                             </div>
                         </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Homepage</label>
+                                <div class="form-check" style="margin-top: 10px;">
+                                    <input class="form-check-input" type="checkbox" value="1" id="is_featured" name="is_featured" {{ old('is_featured') ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="is_featured">Show on home page (Featured)</label>
+                                </div>
+                                <div class="form-text">Only featured products appear in the Featured section on the homepage.</div>
+                                @error('is_featured')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
                     </div>
                 </div>
 

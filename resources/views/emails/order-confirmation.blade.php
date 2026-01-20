@@ -18,7 +18,7 @@
             </p>
 
             <p style="margin: 0 0 14px 0; color:#1f2d3a; font-size: 14px; line-height: 1.6;">
-                Thanks for your order! We’ve received your order <strong>#{{ $order->id }}</strong> and we’ll start processing it right away.
+                Thanks for your order! We’ve received your order <strong>{{ $order->display_order_number }}</strong> and we’ll start processing it right away.
             </p>
 
             <div style="background:#f8f9fa; border: 1px solid #eef1f6; border-radius: 12px; padding: 12px 14px; margin-bottom: 16px;">

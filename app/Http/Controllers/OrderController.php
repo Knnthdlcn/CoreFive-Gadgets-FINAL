@@ -8,6 +8,9 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\CartItem;
 use App\Models\ProductVariant;
+use App\Models\OrderReturn;
+use App\Models\OrderReturnItem;
+use App\Models\ProductReview;
 use Illuminate\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -311,6 +314,13 @@ class OrderController extends Controller
                     'status' => 'pending',
                 ]);
 
+                // Generate an e-commerce style order number (stable, not "#24")
+                if (empty($order->order_number)) {
+                    $date = $order->created_at ? $order->created_at->format('Ymd') : now()->format('Ymd');
+                    $order->order_number = 'CFG-' . $date . '-' . str_pad((string) $order->id, 6, '0', STR_PAD_LEFT);
+                    $order->save();
+                }
+
                 $orderId = $order->id;
 
                 foreach ($requestedLines as $line) {
@@ -384,6 +394,7 @@ class OrderController extends Controller
 
                 return response()->json([
                     'id' => $order->id,
+                    'order_number' => $order->order_number,
                     'message' => 'Order placed successfully',
                 ], 201);
             });
@@ -398,7 +409,257 @@ class OrderController extends Controller
 
     public function myOrders(): View
     {
-        $orders = auth()->user()->orders()->with('items.product')->latest()->get();
-        return view('my-orders', ['orders' => $orders]);
+        $orders = auth()->user()->orders()
+            ->with([
+                'items.product',
+                'items.variant',
+                'items.review',
+                'shippingUpdates.adminUser',
+                'returns.items.orderItem.product',
+                'reviews',
+            ])
+            ->latest()
+            ->get();
+
+        // Prepare Shopee-style "Requests" summary data for the view.
+        $orderNumbers = $orders
+            ->mapWithKeys(fn ($o) => [(int) $o->id => (string) $o->display_order_number])
+            ->all();
+
+        $allReturns = $orders->pluck('returns')->flatten(1);
+        $activeStatuses = ['requested', 'approved', 'in_transit', 'received'];
+        $openReturnCount = $allReturns->whereIn('status', $activeStatuses)->count();
+        $allReturnsSorted = $allReturns
+            ->sortByDesc(fn ($r) => $r->requested_at ?? $r->created_at)
+            ->values();
+
+        return view('my-orders', [
+            'orders' => $orders,
+            'orderNumbers' => $orderNumbers,
+            'openReturnCount' => $openReturnCount,
+            'allReturnsSorted' => $allReturnsSorted,
+        ]);
+    }
+
+    public function buyAgain(Request $request, Order $order)
+    {
+        if ((int) $order->user_id !== (int) auth()->id()) {
+            abort(403);
+        }
+
+        $added = 0;
+        $skipped = 0;
+
+        foreach ($order->items as $item) {
+            $product = Product::where('product_id', (int) $item->product_id)->first();
+            if (!$product) {
+                $skipped++;
+                continue;
+            }
+
+            $variantId = $item->product_variant_id ? (int) $item->product_variant_id : null;
+            $variant = null;
+            if ($variantId) {
+                $variant = ProductVariant::where('id', $variantId)
+                    ->where('product_id', $product->product_id)
+                    ->where('is_active', true)
+                    ->first();
+                if (!$variant) {
+                    $skipped++;
+                    continue;
+                }
+            }
+
+            $qty = max(1, (int) $item->quantity);
+            $isUnlimited = (bool) ($variant?->stock_unlimited ?? $product->stock_unlimited ?? false);
+            $available = (int) ($variant?->stock ?? $product->stock ?? 0);
+            if (!$isUnlimited && $available <= 0) {
+                $skipped++;
+                continue;
+            }
+
+            $cartItemQuery = CartItem::where('user_id', auth()->id())
+                ->where('product_id', $product->product_id);
+            if ($variant?->id) {
+                $cartItemQuery->where('product_variant_id', $variant->id);
+            } else {
+                $cartItemQuery->whereNull('product_variant_id');
+            }
+            $cartItem = $cartItemQuery->first();
+
+            if ($cartItem) {
+                $newQty = (int) $cartItem->quantity + $qty;
+                if (!$isUnlimited && $newQty > $available) {
+                    $cartItem->quantity = $available;
+                } else {
+                    $cartItem->quantity = $newQty;
+                }
+                $cartItem->save();
+            } else {
+                $createQty = (!$isUnlimited && $qty > $available) ? $available : $qty;
+                if ($createQty <= 0) {
+                    $skipped++;
+                    continue;
+                }
+                CartItem::create([
+                    'user_id' => auth()->id(),
+                    'product_id' => $product->product_id,
+                    'product_variant_id' => $variant?->id,
+                    'quantity' => $createQty,
+                ]);
+            }
+
+            $added++;
+        }
+
+        if ($added > 0) {
+            $msg = $skipped > 0
+                ? "Added {$added} item(s). Skipped {$skipped} unavailable item(s)."
+                : "Added {$added} item(s) to your cart.";
+            return redirect()->route('cart.index')->with('success', $msg);
+        }
+
+        return redirect()->back()->with('error', 'No items could be added (items may be unavailable).');
+    }
+
+    public function requestReturn(Request $request, Order $order)
+    {
+        if ((int) $order->user_id !== (int) auth()->id()) {
+            abort(403);
+        }
+
+        // If user already marked complete, do not allow returns.
+        if ($order->completed_at) {
+            return redirect()->back()->with('error', 'This order is already marked as complete and cannot be returned.');
+        }
+
+        $isReturnable = in_array((string) $order->status, ['delivered', 'completed'], true) || (bool) $order->delivered_at;
+        if (!$isReturnable) {
+            return redirect()->back()->with('error', 'Returns are available after the order is delivered.');
+        }
+
+        $validated = $request->validate([
+            'reason' => 'required|string|min:5|max:2000',
+            'items' => 'required|array|min:1',
+            'items.*.order_item_id' => 'required|integer',
+            'items.*.quantity' => 'required|integer|min:1',
+        ]);
+
+        $order->loadMissing('items');
+        $byId = $order->items->keyBy('id');
+
+        // Prevent multiple active return requests for the same order.
+        $hasOpenReturn = $order->returns()
+            ->whereIn('status', ['requested', 'approved', 'in_transit', 'received'])
+            ->exists();
+        if ($hasOpenReturn) {
+            return redirect()->back()->with('error', 'A return request for this order is already in progress.');
+        }
+
+        $now = now();
+        $deadline = $now->copy()->addDays(7);
+
+        DB::transaction(function () use ($order, $validated, $byId, $now, $deadline) {
+            $ret = OrderReturn::create([
+                'order_id' => $order->id,
+                'user_id' => auth()->id(),
+                'status' => 'requested',
+                'reason' => $validated['reason'],
+                'requested_at' => $now,
+                'deadline_at' => $deadline,
+            ]);
+
+            foreach ($validated['items'] as $row) {
+                $orderItemId = (int) ($row['order_item_id'] ?? 0);
+                $qty = (int) ($row['quantity'] ?? 0);
+                $oi = $byId->get($orderItemId);
+                if (!$oi) {
+                    continue;
+                }
+                $maxQty = max(1, (int) $oi->quantity);
+                $qty = max(1, min($qty, $maxQty));
+
+                OrderReturnItem::create([
+                    'order_return_id' => $ret->id,
+                    'order_item_id' => $oi->id,
+                    'quantity' => $qty,
+                ]);
+            }
+        });
+
+        return redirect()->back()->with('success', 'Return request submitted. You have 7 days to return the item(s).');
+    }
+
+    public function submitReview(Request $request, Order $order)
+    {
+        if ((int) $order->user_id !== (int) auth()->id()) {
+            abort(403);
+        }
+
+        $isReviewable = in_array((string) $order->status, ['delivered', 'completed'], true) || (bool) $order->delivered_at;
+        if (!$isReviewable) {
+            return redirect()->back()->with('error', 'You can write reviews after the order is delivered.');
+        }
+
+        $validated = $request->validate([
+            'order_item_id' => 'required|integer',
+            'rating' => 'required|integer|min:1|max:5',
+            'title' => 'nullable|string|max:120',
+            'body' => 'nullable|string|max:5000',
+        ]);
+
+        $order->loadMissing('items');
+        /** @var OrderItem|null $item */
+        $item = $order->items->firstWhere('id', (int) $validated['order_item_id']);
+        if (!$item) {
+            return redirect()->back()->with('error', 'Invalid order item.');
+        }
+
+        ProductReview::updateOrCreate(
+            [
+                'order_item_id' => $item->id,
+                'user_id' => auth()->id(),
+            ],
+            [
+                'order_id' => $order->id,
+                'product_id' => (int) $item->product_id,
+                'product_variant_id' => $item->product_variant_id ? (int) $item->product_variant_id : null,
+                'rating' => (int) $validated['rating'],
+                'title' => $validated['title'] ?? null,
+                'body' => $validated['body'] ?? null,
+                'is_public' => true,
+            ]
+        );
+
+        return redirect()->back()->with('success', 'Review saved.');
+    }
+
+    public function markComplete(Request $request, Order $order)
+    {
+        if ((int) $order->user_id !== (int) auth()->id()) {
+            abort(403);
+        }
+
+        if ($order->completed_at || (string) $order->status === 'completed') {
+            return redirect()->back()->with('success', 'Order is already completed.');
+        }
+
+        $isCompletable = in_array((string) $order->status, ['delivered'], true) || (bool) $order->delivered_at;
+        if (!$isCompletable) {
+            return redirect()->back()->with('error', 'You can mark the order as complete after it is delivered.');
+        }
+
+        $hasOpenReturn = $order->returns()
+            ->whereIn('status', ['requested', 'approved', 'in_transit', 'received'])
+            ->exists();
+        if ($hasOpenReturn) {
+            return redirect()->back()->with('error', 'You have an active return request. Please complete that first.');
+        }
+
+        $order->status = 'completed';
+        $order->completed_at = now();
+        $order->save();
+
+        return redirect()->back()->with('success', 'Order marked as complete. Returns are now disabled for this order.');
     }
 }

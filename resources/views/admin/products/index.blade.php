@@ -17,6 +17,10 @@
                     <input type="hidden" name="category" value="{{ $selectedCategory }}">
                 @endif
 
+                @if(!empty($onlyFeatured))
+                    <input type="hidden" name="featured" value="1">
+                @endif
+
                 <div class="input-group" style="max-width: 520px;">
                     <span class="input-group-text" style="border-radius: 12px 0 0 12px; border: 1px solid rgba(31,45,58,0.12); background: #f6f8fb;">
                         <i class="fas fa-search"></i>
@@ -46,15 +50,23 @@
         @if(isset($categories) && $categories->count())
             <div class="p-4" style="padding-bottom: 0 !important;">
                 <div class="d-flex flex-wrap gap-2">
+                    @php($featuredActive = request()->boolean('featured'))
+
                     <a
-                        href="{{ route('admin.products.index', array_filter(['q' => request('q')])) }}"
+                        href="{{ route('admin.products.index', array_filter(['q' => request('q'), 'category' => request('category'), 'featured' => $featuredActive ? null : 1])) }}"
+                        class="btn btn-sm"
+                        style="border-radius: 999px; font-weight: 800; padding: 8px 14px; border: 1px solid rgba(255, 193, 7, 0.35); {{ $featuredActive ? 'background:#ffc107;color:#1f2d3a;' : 'background:rgba(255, 193, 7, 0.10);color:#9a6a00;' }}"
+                    >Featured</a>
+
+                    <a
+                        href="{{ route('admin.products.index', array_filter(['q' => request('q'), 'featured' => request('featured')])) }}"
                         class="btn btn-sm"
                         style="border-radius: 999px; font-weight: 800; padding: 8px 14px; border: 1px solid rgba(21,101,192,0.25); {{ empty($selectedCategory) ? 'background:#1565c0;color:#fff;' : 'background:rgba(21,101,192,0.08);color:#1565c0;' }}"
                     >All</a>
 
                     @foreach($categories as $cat)
                         <a
-                            href="{{ route('admin.products.index', array_filter(['category' => $cat, 'q' => request('q')])) }}"
+                            href="{{ route('admin.products.index', array_filter(['category' => $cat, 'q' => request('q'), 'featured' => request('featured')])) }}"
                             class="btn btn-sm"
                             style="border-radius: 999px; font-weight: 800; padding: 8px 14px; border: 1px solid rgba(21,101,192,0.25); {{ ($selectedCategory ?? '') === $cat ? 'background:#1565c0;color:#fff;' : 'background:rgba(21,101,192,0.08);color:#1565c0;' }}"
                         >{{ $cat }}</a>
@@ -75,6 +87,7 @@
                     <tr>
                         <th>ID</th>
                         <th>Name</th>
+                        <th>Featured</th>
                         <th>Category</th>
                         <th>Price</th>
                         <th>Stock</th>
@@ -90,6 +103,13 @@
                                 <strong>{{ $product->product_name }}</strong>
                                 <br>
                                 <small style="color: #7f8c8d;">{{ Str::limit($product->description, 50) }}</small>
+                            </td>
+                            <td>
+                                @if($product->is_featured)
+                                    <span class="badge" style="background: rgba(255, 193, 7, 0.18); color: #9a6a00; border: 1px solid rgba(255, 193, 7, 0.35);">Yes</span>
+                                @else
+                                    <span class="badge" style="background: rgba(148, 163, 184, 0.18); color: #1f2d3a; border: 1px solid rgba(148, 163, 184, 0.35);">No</span>
+                                @endif
                             </td>
                             <td>
                                 <span class="badge" style="background: #1565c0; color: white;">{{ $product->category ?? 'N/A' }}</span>
@@ -136,7 +156,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" style="text-align: center; color: #7f8c8d; padding: 40px;">
+                            <td colspan="8" style="text-align: center; color: #7f8c8d; padding: 40px;">
                                 <i class="fas fa-inbox" style="font-size: 2rem; margin-bottom: 10px;"></i>
                                 <p>No products found</p>
                             </td>

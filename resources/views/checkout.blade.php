@@ -14,7 +14,7 @@
         </script>
     @endif
 
-    <main class="container py-5 content-with-footer">
+    <main class="container py-5 content-with-footer checkout-page">
         <!-- Page Header -->
         <div class="mb-5">
             <h2 class="mb-2" style="font-weight: 700; font-size: 2rem; color: #2c3e50;">Checkout</h2>
@@ -36,7 +36,7 @@
             </div>
 
             <!-- Summary & Forms column -->
-            <div class="col-lg-4" id="stickyForms" style="position: sticky; top: 20px; max-height: calc(100vh - 150px); overflow-y: auto;">
+            <div class="col-lg-4" id="stickyForms">
                 <!-- Order Summary -->
                 <div class="card border-0 shadow-sm card-summary mb-4" style="border-radius: 12px;">
                     <div class="card-body" style="padding: 24px;">
@@ -215,6 +215,15 @@
 
     @push('styles')
     <style>
+        /* Checkout: summary should scroll with the page (no sticky overlap) */
+        .checkout-page .card-summary {
+            position: static !important;
+            top: auto !important;
+        }
+        .checkout-page #stickyForms {
+            position: static !important;
+        }
+
         .checkout-items .list-group-item {
             border: none;
             border-radius: 12px;
@@ -285,6 +294,23 @@
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
         }
+
+        /* Keep sidebar content scrolling with the page (no inner scrollbar). */
+        #stickyForms {
+            position: static;
+            max-height: none;
+            overflow: visible;
+        }
+
+        /* Optional: keep only the Order Summary visible on desktop without trapping scroll */
+        @media (min-width: 992px) {
+            .card-summary {
+                position: sticky;
+                top: 20px;
+                z-index: 1;
+                background: #fff;
+            }
+        }
         
         .card-summary li {
             display: flex;
@@ -312,9 +338,8 @@
         }
         
         @media (max-width: 991.98px) {
-            #stickyForms {
-                position: static !important;
-                max-height: none !important;
+            .card-summary {
+                position: static;
             }
         }
     </style>

@@ -3,10 +3,10 @@
 @section('title', 'Login')
 
 @section('content')
-<div class="container py-5">
+<div class="container py-4 py-lg-5 auth-page-container">
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
-            <div class="card border-0" style="border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12); overflow: hidden;">
+            <div class="card border-0 auth-login-card" style="border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12); overflow: hidden;">
                 <div class="card-header border-0" style="background: linear-gradient(135deg, #06131a 0%, #1a3a52 100%); padding: 26px 24px;">
                     <h4 class="m-0" style="color:#fff; font-weight: 800;">Sign in</h4>
                     <p class="m-0" style="color: rgba(255,255,255,0.7); font-size: 0.95rem;">Log in to continue shopping.</p>
@@ -18,7 +18,7 @@
                         <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" style="width:18px;height:18px;"> Continue with Google
                     </a>
 
-                    <div style="display:flex; align-items:center; gap:12px; margin: 8px 0 18px 0;">
+                    <div class="auth-login-divider" style="display:flex; align-items:center; gap:12px; margin: 8px 0 18px 0;">
                         <div style="flex:1; height:1px; background:#f0f0f0;"></div>
                         <div style="color:#999; font-size:0.85rem; font-weight:700;">or login with email</div>
                         <div style="flex:1; height:1px; background:#f0f0f0;"></div>
@@ -54,6 +54,46 @@
         </div>
     </div>
 </div>
+
+@push('styles')
+<style>
+    @media (max-width: 575.98px) {
+        .auth-page-container {
+            padding-top: 12px !important;
+            padding-bottom: 18px !important;
+        }
+
+        .auth-login-card {
+            border-radius: 14px !important;
+        }
+
+        .auth-login-card .card-header {
+            padding: 18px 16px !important;
+        }
+
+        .auth-login-card .card-body {
+            padding: 16px !important;
+        }
+
+        .auth-login-card .form-control {
+            padding: 10px 14px !important;
+        }
+
+        .auth-login-card .btn {
+            padding: 10px 14px !important;
+        }
+
+        .auth-login-divider {
+            margin: 6px 0 12px 0 !important;
+        }
+
+        #pageLoginError {
+            margin-bottom: 12px !important;
+            font-size: 0.92rem;
+        }
+    }
+</style>
+@endpush
 
 @include('auth.modals')
 

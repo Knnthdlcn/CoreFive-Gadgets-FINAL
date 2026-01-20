@@ -20,6 +20,22 @@ Route::get('/product/{id}', [ProductController::class, 'show'])->name('product.s
 Route::get('/contactus', [ContactController::class, 'index'])->name('contact.index');
 Route::post('/contactus', [ContactController::class, 'store'])->name('contact.store');
 
+// Customer service pages
+Route::view('/shipping-delivery', 'pages.shipping-delivery')->name('pages.shipping');
+Route::view('/returns-refunds', 'pages.returns-refunds')->name('pages.returns');
+Route::view('/faqs', 'pages.faqs')->name('pages.faqs');
+Route::view('/privacy-policy', 'pages.privacy-policy')->name('pages.privacy');
+Route::view('/terms-conditions', 'pages.terms-conditions')->name('pages.terms');
+
+// Newsletter subscribe (simple endpoint)
+Route::post('/newsletter/subscribe', function (\Illuminate\Http\Request $request) {
+    $validated = $request->validate([
+        'newsletter_email' => ['required', 'email'],
+    ]);
+
+    return back()->with('newsletter_success', 'Thanks — you are subscribed!');
+})->name('newsletter.subscribe');
+
 Route::get('/account-disabled', function () {
     return view('auth.account-disabled');
 })->name('account.disabled');
@@ -94,6 +110,13 @@ Route::middleware(['web'])->group(function () {
         Route::post('/buy-now/cancel', [OrderController::class, 'cancelBuyNow'])->name('buy-now.cancel');
         Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
         Route::get('/my-orders', [OrderController::class, 'myOrders'])->name('orders.index');
+
+        // Interactive receipt actions
+        Route::post('/orders/{order}/buy-again', [OrderController::class, 'buyAgain'])->name('orders.buy-again');
+        Route::post('/orders/{order}/review', [OrderController::class, 'submitReview'])->name('orders.review');
+        Route::post('/orders/{order}/return', [OrderController::class, 'requestReturn'])->name('orders.return');
+        Route::post('/orders/{order}/complete', [OrderController::class, 'markComplete'])->name('orders.complete');
+
         Route::get('/profile', [AuthController::class, 'profile'])->name('profile');
         Route::put('/profile', [AuthController::class, 'updateProfile'])->name('profile.update');
         Route::put('/profile/password', [AuthController::class, 'updatePassword'])->name('profile.password');
@@ -126,6 +149,12 @@ Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function ()
     Route::get('/orders', [AdminController::class, 'indexOrders'])->name('orders.index');
     Route::get('/orders/{order}', [AdminController::class, 'showOrder'])->name('orders.show');
     Route::patch('/orders/{order}/status', [AdminController::class, 'updateOrderStatus'])->name('orders.update-status');
+    Route::post('/orders/{order}/shipping-updates', [AdminController::class, 'storeOrderShippingUpdate'])->name('orders.shipping-updates.store');
+
+    // Returns management
+    Route::get('/returns', [AdminController::class, 'indexReturns'])->name('returns.index');
+    Route::get('/returns/{orderReturn}', [AdminController::class, 'showReturn'])->name('returns.show');
+    Route::patch('/returns/{orderReturn}/status', [AdminController::class, 'updateReturnStatus'])->name('returns.update-status');
     
     // Contacts management
     Route::get('/contacts', [AdminController::class, 'indexContacts'])->name('contacts.index');

@@ -181,6 +181,25 @@
                 </div>
             </div>
 
+            @if(isset($categories) && $categories->count())
+                <!-- Categories (mobile) -->
+                <div class="mt-3" style="background:#fff; border-radius: 16px; padding: 14px; box-shadow: 0 8px 18px rgba(0,0,0,0.06);">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div style="font-weight: 900; color:#111827; font-size: 1.0rem;">Shop by Category</div>
+                        <a href="{{ route('products.index') }}" style="text-decoration:none; font-weight: 900; color:#1565c0;">Browse <i class="fas fa-chevron-right" style="font-size: 0.8rem;"></i></a>
+                    </div>
+                    <div class="d-flex gap-2" style="overflow-x:auto; padding-bottom: 6px;">
+                        @foreach($categories as $cat)
+                            <a href="{{ route('products.index', ['category' => $cat->name]) }}"
+                               class="btn btn-sm"
+                               style="white-space:nowrap; border-radius: 999px; font-weight: 900; padding: 10px 14px; background: rgba(21,101,192,0.08); color:#1565c0; border: 1px solid rgba(21,101,192,0.20);">
+                                <i class="fas fa-layer-group me-1"></i>{{ $cat->name }}
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
+
             <!-- Featured products (mobile section header) -->
             <div class="d-flex align-items-center justify-content-between mt-4 mb-2">
                 <div style="font-weight: 900; color:#111827; font-size: 1.05rem;">Featured Products</div>
@@ -194,83 +213,119 @@
         <div class="container">
             <h1 class="display-4 fw-bold mb-3">Welcome to CoreFive Gadgets</h1>
             <p class="lead mb-4">Discover premium products for your business and lifestyle</p>
+            <div class="d-flex justify-content-center gap-2 gap-md-3 flex-wrap">
+                <a href="{{ route('products.index') }}" class="btn btn-warning" style="border-radius: 999px; font-weight: 900; padding: 12px 18px; background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); border: 0;">
+                    <i class="fas fa-store me-2"></i>Shop Products
+                </a>
+                <a href="#featured-products" class="btn btn-outline-light" style="border-radius: 999px; font-weight: 900; padding: 12px 18px; border-width: 2px;">
+                    <i class="fas fa-star me-2"></i>Featured Picks
+                </a>
+            </div>
         </div>
     </header>
 
-    <!-- PRODUCTS -->
+    <!-- TRUST STRIP (desktop) -->
+    <section class="d-none d-lg-block" style="background: #ffffff;">
+        <div class="container py-4">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="p-3" style="border-radius: 14px; border: 1px solid rgba(15, 23, 42, 0.08); background: #fff;">
+                        <div style="font-weight: 900; color:#111827;"><i class="fas fa-shield-halved me-2" style="color:#1565c0;"></i>Secure checkout</div>
+                        <div style="color:#6b7280; font-weight: 600; font-size: 0.95rem;">Safe payments and verified orders</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3" style="border-radius: 14px; border: 1px solid rgba(15, 23, 42, 0.08); background: #fff;">
+                        <div style="font-weight: 900; color:#111827;"><i class="fas fa-truck-fast me-2" style="color:#f59e0b;"></i>Fast delivery</div>
+                        <div style="color:#6b7280; font-weight: 600; font-size: 0.95rem;">Quick dispatch and tracking</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3" style="border-radius: 14px; border: 1px solid rgba(15, 23, 42, 0.08); background: #fff;">
+                        <div style="font-weight: 900; color:#111827;"><i class="fas fa-badge-check me-2" style="color:#16a085;"></i>Quality picks</div>
+                        <div style="color:#6b7280; font-weight: 600; font-size: 0.95rem;">Curated gadgets and accessories</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-3" style="border-radius: 14px; border: 1px solid rgba(15, 23, 42, 0.08); background: #fff;">
+                        <div style="font-weight: 900; color:#111827;"><i class="fas fa-headset me-2" style="color:#1a3a52;"></i>Support</div>
+                        <div style="color:#6b7280; font-weight: 600; font-size: 0.95rem;">Message us anytime</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CATEGORIES (desktop) -->
+    @if(isset($categories) && $categories->count())
+        <section class="d-none d-lg-block" style="background: #ffffff;">
+            <div class="container pb-4">
+                <div class="d-flex align-items-end justify-content-between mb-3">
+                    <div>
+                        <h2 style="margin: 0; font-size: 1.9rem; font-weight: 900; color:#111827;">Shop by Category</h2>
+                        <div style="color:#6b7280; font-weight: 600;">Find what you need faster</div>
+                    </div>
+                    <a href="{{ route('products.index') }}" style="text-decoration:none; font-weight: 900; color:#1565c0;">View all</a>
+                </div>
+                <div class="row g-3">
+                    @foreach($categories as $cat)
+                        <div class="col-md-3">
+                            <a href="{{ route('products.index', ['category' => $cat->name]) }}" class="text-decoration-none">
+                                <div class="p-3 h-100" style="border-radius: 14px; border: 1px solid rgba(21,101,192,0.14); background: linear-gradient(135deg, rgba(21,101,192,0.08) 0%, rgba(255,193,7,0.08) 100%);">
+                                    <div style="font-weight: 1000; color:#111827; font-size: 1.05rem;"><i class="fas fa-layer-group me-2" style="color:#1565c0;"></i>{{ $cat->name }}</div>
+                                    <div style="color:#6b7280; font-weight: 600; margin-top: 6px;">Browse products</div>
+                                </div>
+                            </a>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+    @endif
+
+    <!-- FEATURED (admin-curated) -->
     <section class="py-4 py-lg-5" id="featured-products" style="background: #f3f4f6;">
         <div class="container">
             <div class="d-none d-lg-block">
                 <h2 class="text-center mb-2" style="font-size: 2.5rem; font-weight: 700;">Featured Products</h2>
-                <p class="text-center text-muted mb-5">Handpicked gadgets and accessories for tech enthusiasts</p>
+                <div class="mb-5"></div>
             </div>
 
             <div class="row g-3 g-lg-4">
-                @forelse($products as $product)
+                @forelse($featuredProducts as $product)
                     <div class="col-6 col-md-4">
-                        <div class="card h-100 border-0 shadow-sm product-card" style="transition: all 0.3s ease; border-radius: 14px; overflow: hidden; background: #ffffff;">
-                            <a href="{{ route('product.show', $product->product_id) }}" class="text-decoration-none">
-                                <div class="card-img-wrapper position-relative overflow-hidden" style="height: 190px; background: #ffffff; cursor: pointer; border: 1px solid #f0f0f0;">
-                                    <img src="{{ $product->image_url }}" class="card-img-top w-100 h-100" alt="{{ $product->product_name }}" style="object-fit: contain; padding: 10px; transition: transform 0.3s ease;" onerror="this.src='{{ asset('images/placeholder.png') }}';">
-                                    <div class="overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(0, 0, 0, 0); transition: background 0.3s ease; pointer-events: none;">
-                                        <span class="badge bg-dark text-white px-3 py-2" style="opacity: 0; transition: opacity 0.3s ease;">
-                                            <i class="fas fa-eye me-1"></i> View Details
-                                        </span>
-                                    </div>
-                                </div>
-                            </a>
-                            <div class="card-body d-flex flex-column p-3 p-lg-4" style="background: #ffffff;">
-                                <a href="{{ route('product.show', $product->product_id) }}" class="text-decoration-none">
-                                    <h5 class="card-title mb-2" style="font-weight: 700; font-size: 0.95rem; color: #111827; line-height: 1.2;">
-                                        {{ $product->product_name }}
-                                    </h5>
-                                </a>
-                                @php($priceDisplay = $product->has_variants ? (data_get($product->price_range, 'display') ?: ('₱' . number_format($product->price, 0))) : ('₱' . number_format($product->price, 0)))
-                                <p class="card-text mb-2" style="font-size: 1.05rem; font-weight: 900; color: #111827;">{{ $priceDisplay }}</p>
+                        @include('partials.product-card', ['product' => $product])
+                    </div>
+                @empty
+                    <div class="col-12 text-center">
+                        <p class="text-muted">No featured products yet. Mark products as Featured in the admin panel.</p>
+                    </div>
+                @endforelse
+            </div>
 
-                                <div class="mb-3" style="margin-top: -8px;">
-                                    @php($state = $product->stock_state)
-                                    <span style="font-size: 0.9rem; color: #6c757d;">
-                                        @if($product->has_variants)
-                                            Multiple options
-                                        @elseif($state === 'unlimited')
-                                            In stock
-                                        @elseif($state === 'out_of_stock')
-                                            Out of stock
-                                        @elseif($state === 'low_stock')
-                                            <span style="color:#5f6368; font-weight: 600;">Only {{ (int)($product->effective_stock ?? 0) }} left</span>
-                                        @else
-                                            In stock ({{ (int)($product->effective_stock ?? 0) }})
-                                        @endif
-                                    </span>
-                                </div>
-                                
-                                <!-- Category and Buttons -->
-                                <div class="d-flex justify-content-between align-items-center mt-auto product-actions">
-                                    @if($product->category)
-                                        <span class="badge" style="background: linear-gradient(135deg, #06131a 0%, #1a3a52 100%); font-size: 0.75rem; padding: 4px 8px;">{{ $product->category }}</span>
-                                    @else
-                                        <span></span>
-                                    @endif
-                                    <div class="d-flex gap-2 product-actions-buttons">
-                                        <button class="btn btn-outline-warning add-to-cart-btn" 
-                                                data-product-id="{{ $product->product_id }}"
-                                                data-has-variants="{{ $product->has_variants ? 1 : 0 }}"
-                                                style="border-radius: 10px; padding: 9px 12px; border: 2px solid #ffc107; transition: all 0.3s ease;"
-                                                {{ $product->is_out_of_stock ? 'disabled' : '' }}>
-                                            <i class="fas fa-shopping-cart"></i>
-                                        </button>
-                                        <button class="btn btn-warning buy-now-btn" 
-                                                data-product-id="{{ $product->product_id }}"
-                                                data-has-variants="{{ $product->has_variants ? 1 : 0 }}"
-                                                style="border-radius: 10px; font-weight: 800; padding: 9px 14px; background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%); border: none; transition: all 0.3s ease;"
-                                                {{ $product->is_out_of_stock ? 'disabled' : '' }}>
-                                            <i class="fas fa-bolt me-1"></i>{{ $product->has_variants ? 'Select Options' : 'Buy Now' }}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+            <div class="text-center mt-4">
+                <a href="{{ route('products.index') }}" class="btn btn-outline-dark" style="border-radius: 999px; font-weight: 900; padding: 12px 18px; border-width: 2px;">
+                    View all products <i class="fas fa-arrow-right ms-2"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW ARRIVALS -->
+    <section class="py-4 py-lg-5" style="background: #ffffff;">
+        <div class="container">
+            <div class="d-flex align-items-end justify-content-between mb-3">
+                <div>
+                    <h2 style="margin: 0; font-size: 1.8rem; font-weight: 900; color:#111827;">New Arrivals</h2>
+                    <div style="color:#6b7280; font-weight: 600;">Fresh picks added recently</div>
+                </div>
+                <a href="{{ route('products.index') }}" style="text-decoration:none; font-weight: 900; color:#1565c0;">Browse</a>
+            </div>
+
+            <div class="row g-3 g-lg-4">
+                @forelse($newArrivals as $product)
+                    <div class="col-6 col-md-4">
+                        @include('partials.product-card', ['product' => $product])
                     </div>
                 @empty
                     <div class="col-12 text-center">
@@ -575,11 +630,12 @@
                 fetch('{{ route("cart.get") }}')
                     .then(response => response.json())
                     .then(data => {
-                        const cartBadge = document.getElementById('cartCount');
-                        if (cartBadge && data.cart_count !== undefined) {
-                            cartBadge.textContent = data.cart_count;
-                            cartBadge.style.display = data.cart_count > 0 ? 'inline-block' : 'none';
-                        }
+                        if (data.cart_count === undefined) return;
+                        const count = Number(data.cart_count) || 0;
+                        document.querySelectorAll('[data-cart-count-badge]').forEach((badge) => {
+                            badge.textContent = String(count);
+                            badge.style.display = count > 0 ? 'inline-block' : 'none';
+                        });
                     });
             }
         </script>
