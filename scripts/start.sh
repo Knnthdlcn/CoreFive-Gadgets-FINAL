@@ -5,6 +5,9 @@ cd /var/www/html
 # copy CA cert to a readable place
 cp /etc/secrets/aiven-ca.pem /var/www/html/storage/aiven-ca.pem
 
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
 
 chmod 644 /var/www/html/storage/aiven-ca.pem
 chmod 644 /var/www/html/storage/aiven-ca.pem

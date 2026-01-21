@@ -15,8 +15,8 @@ use App\Http\Controllers\EmailVerificationOtpController;
 use Illuminate\Support\Facades\DB;
 
 
-Route::view('/https://corefive-gadgets.onrender.com/privacy-policy',);
-Route::view('/https://corefive-gadgets.onrender.com/terms-conditions',);
+Route::view('/privacy-policy', 'privacy-policy');
+Route::view('/terms-conditions', 'terms-conditions');
 
 
 
