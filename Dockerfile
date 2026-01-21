@@ -17,4 +17,6 @@ COPY conf/nginx/site.conf.template /etc/nginx/templates/default.conf.template
 COPY scripts/start.sh /start.sh
 RUN chmod +x /start.sh
 
+RUN sed -i 's|listen = 9000|listen = 127.0.0.1:9000|' /usr/local/etc/php-fpm.d/zz-docker.conf
+
 CMD ["/start.sh"]
