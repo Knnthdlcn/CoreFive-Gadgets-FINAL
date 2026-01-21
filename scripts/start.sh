@@ -2,14 +2,17 @@
 set -e
 cd /var/www/html
 
-# Create Laravel required cache directories
+umask 0002
+
 mkdir -p storage/framework/cache/data
 mkdir -p storage/framework/sessions
 mkdir -p storage/framework/views
+mkdir -p storage/logs
 mkdir -p bootstrap/cache
 
-chown -R www-data:www-data storage bootstrap/cache || true
+# Make sure BOTH nginx user and php-fpm user can write
 chmod -R 775 storage bootstrap/cache || true
+chown -R www-data:www-data storage bootstrap/cache || true
 
 
 composer install --no-dev --optimize-autoloader
@@ -18,9 +21,11 @@ composer install --no-dev --optimize-autoloader
 
 envsubst '${PORT}' < /etc/nginx/templates/default.conf.template > /etc/nginx/sites-available/default
 
+php artisan optimize:clear || true
 php artisan config:cache || true
 php artisan route:cache || true
 php artisan view:cache || true
+
 
 php-fpm -D
 nginx -t
