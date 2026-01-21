@@ -274,6 +274,7 @@ Wayfinder generates TypeScript functions and types for Laravel controllers and r
     postShow(1) // { url: "/posts/1", method: "get" }
 </code-snippet>
 
+
 ### Wayfinder + Inertia
 If your application uses the `<Form>` component from Inertia, you can use Wayfinder to generate form action and method automatically.
 <code-snippet name="Wayfinder Form Component (Vue)" lang="vue">
@@ -379,6 +380,8 @@ it('may reset the password', function () {
 });
 </code-snippet>
 
+
+
 <code-snippet name="Pest Smoke Testing Example" lang="php">
 $pages = visit(['/', '/about', '/contact']);
 
@@ -459,6 +462,7 @@ $pages->assertNoJavascriptErrors()->assertNoConsoleLogs();
     </div>
 </code-snippet>
 
+
 ### Dark Mode
 - If existing pages and components support dark mode, new pages and components must support dark mode in a similar way, typically using `dark:`.
 
@@ -484,6 +488,7 @@ $pages->assertNoJavascriptErrors()->assertNoConsoleLogs();
    - @tailwind utilities;
    + @import "tailwindcss";
 </code-snippet>
+
 
 ### Replaced Utilities
 - Tailwind v4 removed deprecated utilities. Do not use the deprecated option; use the replacement.
