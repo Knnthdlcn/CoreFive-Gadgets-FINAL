@@ -14,6 +14,12 @@ use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\EmailVerificationOtpController;
 use Illuminate\Support\Facades\DB;
 
+
+Route::view('/https://corefive-gadgets.onrender.com/privacy-policy',);
+Route::view('/https://corefive-gadgets.onrender.com/terms-conditions',);
+
+
+
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
@@ -134,6 +140,14 @@ Route::middleware(['web'])->group(function () {
         Route::post('/products', [ProductController::class, 'store'])->name('products.store');
     });
 });
+
+
+
+Route::get('/db-test', function () {
+    DB::connection()->getPdo();
+    return "DB connected ✅";
+});
+
 
 // Admin authentication routes (not protected)
 Route::prefix('admin')->name('admin.')->group(function () {
