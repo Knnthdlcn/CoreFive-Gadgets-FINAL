@@ -12,6 +12,7 @@ use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\GoogleAuthController;
 use App\Http\Controllers\EmailVerificationOtpController;
+use Illuminate\Support\Facades\DB;
 
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -39,6 +40,12 @@ Route::post('/newsletter/subscribe', function (\Illuminate\Http\Request $request
 Route::get('/account-disabled', function () {
     return view('auth.account-disabled');
 })->name('account.disabled');
+
+Route::get('/db-test', function () {
+    DB::connection()->getPdo();
+    $db = DB::select('SELECT DATABASE() AS db');
+    return response()->json($db);
+});
 
 // Auth routes
 Route::get('/login', function () {
