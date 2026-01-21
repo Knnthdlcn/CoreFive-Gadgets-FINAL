@@ -46,6 +46,9 @@ Route::get('/db-test', function () {
     $db = DB::select('SELECT DATABASE() AS db');
     return response()->json($db);
 });
+Route::get('/ping', function () {
+    return 'OK';
+});
 
 // Auth routes
 Route::get('/login', function () {
