@@ -8,8 +8,9 @@ mkdir -p storage/framework/sessions
 mkdir -p storage/framework/views
 mkdir -p bootstrap/cache
 
-# Permissions
-chmod -R ug+rw storage bootstrap/cache || true
+chown -R www-data:www-data storage bootstrap/cache || true
+chmod -R 775 storage bootstrap/cache || true
+
 
 composer install --no-dev --optimize-autoloader
 

@@ -18,5 +18,7 @@ COPY scripts/start.sh /start.sh
 RUN chmod +x /start.sh
 
 RUN sed -i 's|listen = 9000|listen = 127.0.0.1:9000|' /usr/local/etc/php-fpm.d/zz-docker.conf
+# Ensure Laravel can write cache/logs
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
 CMD ["/start.sh"]
