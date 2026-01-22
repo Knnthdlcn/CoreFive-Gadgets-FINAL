@@ -41,3 +41,4 @@ ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 php-fpm -D
 nginx -t
 nginx -g "daemon off;"
+
