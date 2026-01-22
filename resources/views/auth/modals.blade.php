@@ -482,46 +482,11 @@ document.getElementById('signupForm')?.addEventListener('submit', async (e) => {
 
             // If the email is already taken, offer to resend verification (guest flow)
             if (data.errors.email && data.errors.email.join(' ').toLowerCase().includes('taken')) {
-                const alertMsg = firstMsg + ' If this is your account and you haven\'t verified your email, you can resend the verification code.';
-                showSignupError(alertMsg);
-
-                // Add a resend button under the alert (avoid duplicates)
-                if (!document.getElementById('resendVerificationBtn')) {
-                    const resend = document.createElement('button');
-                    resend.id = 'resendVerificationBtn';
-                    resend.type = 'button';
-                    resend.className = 'btn btn-outline-primary w-100 mt-3';
-                    resend.textContent = 'Resend verification code';
-                    resend.addEventListener('click', async () => {
-                        try {
-                            resend.disabled = true;
-                            resend.textContent = 'Sending...';
-                            const form = new FormData();
-                            form.append('email', email);
-                            const r = await fetch('{{ route("verification.guest.send") }}', {
-                                method: 'POST',
-                                body: form,
-                                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
-                            });
-                            const j = await r.json();
-                            if (r.ok) {
-                                // redirect to guest verification notice
-                                window.location.href = '{{ route("verification.guest.notice") }}';
-                            } else {
-                                showSignupError(j.message || 'Unable to resend verification code.');
-                                resend.disabled = false;
-                                resend.textContent = 'Resend verification code';
-                            }
-                        } catch (err) {
-                            showSignupError('An error occurred while sending the verification code.');
-                            resend.disabled = false;
-                            resend.textContent = 'Resend verification code';
-                        }
-                    });
-
-                    const footer = document.querySelector('#signupForm .modal-footer') || document.querySelector('#signupForm');
-                    if (footer) footer.parentNode.insertBefore(resend, footer.nextSibling);
-                }
+                // Instead of just showing resend, redirect to verification page with a flag
+                // so the user can resend from there (and see the banner)
+                let dest = '{{ route("verification.guest.notice") }}';
+                // Optionally add ?mail_send=failed if you want to show a banner
+                window.location.href = dest + '?mail_send=failed';
             } else {
                 showSignupError(firstMsg || 'Signup failed. Please check your input.');
             }
