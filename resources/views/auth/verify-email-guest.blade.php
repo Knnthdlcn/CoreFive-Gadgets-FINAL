@@ -32,22 +32,8 @@
                     <form method="POST" action="{{ route('verification.guest.verify') }}" class="mb-3">
                         @csrf
                         <input type="hidden" name="next" value="{{ old('next', $next ?? request('next')) }}">
-
-                        <label for="email" class="form-label" style="font-weight: 700; color:#1f2d3a;">Email address</label>
-                        <input
-                            id="email"
-                            name="email"
-                            type="email"
-                            autocomplete="email"
-                            class="form-control @error('email') is-invalid @enderror"
-                            style="border-radius: 10px; padding: 12px 14px;"
-                            value="{{ old('email', $email ?? request('email')) }}"
-                            placeholder="you@example.com"
-                            required
-                        />
-                        @error('email')
-                            <div class="text-danger mt-1" style="font-size: 0.9rem;">{{ $message }}</div>
-                        @enderror
+                        {{-- Keep email as hidden so resend and verification can use it when provided via query or prior form --}} 
+                        <input type="hidden" name="email" value="{{ old('email', $email ?? request('email')) }}">
 
                         <label for="code" class="form-label mt-3" style="font-weight: 700; color:#1f2d3a;">Verification code</label>
                         <input
