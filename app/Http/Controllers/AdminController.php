@@ -161,14 +161,14 @@ class AdminController extends Controller
             'stock' => 'nullable|integer|min:0',
         ]);
 
+        // Handle uploaded image (move to public/images) and set image_path on the
+        // validated payload before creating the product to avoid referencing
+        // an undefined $product variable.
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $imageName = time() . '_' . $image->getClientOriginalName();
+            // Store on the `public` disk (storage/app/public/products/...)
             $path = $request->file('image')->store('products', 'public');
-            $product->image = $path;
-            $product->save();
-
-            $validated['image_path'] = 'images/' . $imageName;
+            // Use the public symlink path so asset() resolves correctly: public/storage/products/...
+            $validated['image_path'] = 'storage/' . $path;
         }
         unset($validated['image']);
 
@@ -178,7 +178,7 @@ class AdminController extends Controller
         $validated['stock_updated_at'] = now();
         $validated['is_featured'] = $request->boolean('is_featured');
 
-        Product::create($validated);
+        $product = Product::create($validated);
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Product created successfully!');
@@ -221,12 +221,9 @@ class AdminController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $image = $request->file('image');
-            $imageName = time() . '_' . $image->getClientOriginalName();
+            // Store new image on public disk and set image path to the storage symlink path
             $path = $request->file('image')->store('products', 'public');
-            $product->image = $path;
-            $product->save();
-            $validated['image_path'] = 'images/' . $imageName;
+            $validated['image_path'] = 'storage/' . $path;
         }
         unset($validated['image']);
 

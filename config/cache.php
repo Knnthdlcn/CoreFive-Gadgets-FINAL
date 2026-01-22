@@ -15,7 +15,23 @@ return [
     |
     */
 
-    'default' => env('CACHE_STORE', 'database'),
+    // Use file cache by default to avoid fatal DB errors when DB is not
+    // configured or sqlite file is missing on the host.
+    'default' => (function () {
+        $store = env('CACHE_STORE', null);
+        if ($store === null) {
+            return 'file';
+        }
+
+        if ($store === 'database' && env('DB_CONNECTION') === 'sqlite') {
+            $dbPath = env('DB_DATABASE');
+            if ($dbPath && !file_exists($dbPath)) {
+                return 'file';
+            }
+        }
+
+        return $store;
+    })(),
 
     /*
     |--------------------------------------------------------------------------

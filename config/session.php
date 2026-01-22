@@ -18,7 +18,26 @@ return [
     |
     */
 
-    'driver' => env('SESSION_DRIVER', 'database'),
+    // Default to file sessions to avoid hard-failing when a DB is not available
+    // (hosts like Render may not have the expected sqlite file or DB config).
+    'driver' => (function () {
+        $driver = env('SESSION_DRIVER', null);
+        if ($driver === null) {
+            return 'file';
+        }
+
+        // If configured to use database sessions with sqlite but the sqlite
+        // database file does not exist, fall back to file sessions to prevent
+        // a fatal exception during session start.
+        if ($driver === 'database' && env('DB_CONNECTION') === 'sqlite') {
+            $dbPath = env('DB_DATABASE');
+            if ($dbPath && !file_exists($dbPath)) {
+                return 'file';
+            }
+        }
+
+        return $driver;
+    })(),
 
     /*
     |--------------------------------------------------------------------------
