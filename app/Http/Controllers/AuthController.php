@@ -190,7 +190,9 @@ class AuthController extends Controller
 
     public function profile()
     {
-        return view('profile');
+        // Pass the authenticated user to the view to avoid undefined variable
+        // usage in `resources/views/profile.blade.php` (uses `$user->avatar`).
+        return view('profile', ['user' => Auth::user()]);
     }
 
     public function updateProfile(Request $request)
