@@ -97,6 +97,11 @@ return [
             ],
             'retry_after' => 60,
         ],
+        'sendgrid' => [
+            'transport' => 'smtp',
+            'url' => env('MAILER_DSN'),
+        ],
+
 
     ],
 
