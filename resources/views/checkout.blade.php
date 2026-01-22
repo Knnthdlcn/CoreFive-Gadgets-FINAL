@@ -342,6 +342,49 @@
                 position: static;
             }
         }
+        /* Mobile-specific adjustments for checkout items */
+        @media (max-width: 575.98px) {
+            .checkout-items .item-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+            .checkout-items .item-img {
+                width: 100%;
+                height: auto;
+                max-height: 220px;
+                object-fit: contain;
+                padding: 12px;
+            }
+            .checkout-items .item-body {
+                padding: 0 4px;
+            }
+            .checkout-items .item-body .d-flex.w-100 {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                gap: 8px;
+            }
+            .checkout-items .item-body .d-flex.align-items-center {
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .checkout-items .qty-input {
+                width: 84px;
+                min-width: 64px;
+            }
+            .checkout-items .btn-remove {
+                margin-left: 0;
+                flex: 0 0 auto;
+            }
+            .checkout-items .item-body h6 {
+                font-size: 1rem;
+                margin-bottom: 0;
+            }
+            .checkout-items .item-body small.text-muted {
+                font-size: 0.95rem;
+            }
+        }
     </style>
     @endpush
 
