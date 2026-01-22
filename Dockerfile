@@ -41,6 +41,10 @@ COPY vite.config.* ./
 COPY resources ./resources
 COPY public ./public
 COPY composer.json ./
+COPY scripts/start.sh /start.sh
+RUN chmod +x /start.sh
+
+
 
 
 # Build -> generates public/build/manifest.json
