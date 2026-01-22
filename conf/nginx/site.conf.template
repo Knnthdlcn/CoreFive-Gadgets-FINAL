@@ -5,8 +5,20 @@ server {
     root /var/www/html/public;
     index index.php index.html;
 
+    client_max_body_size 20M;
+
     location / {
         try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+    }
+
+    location ~* \.(css|js|jpg|jpeg|png|gif|ico|svg|woff2?)$ {
+        expires 7d;
+        add_header Cache-Control "public";
+        access_log off;
     }
 
     location ~ \.php$ {
