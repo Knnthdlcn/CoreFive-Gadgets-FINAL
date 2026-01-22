@@ -19,11 +19,6 @@
                         </div>
                     @endif
 
-                    @if ($errors->has('email'))
-                        <div class="alert alert-danger" role="alert">
-                            {{ $errors->first('email') }}
-                        </div>
-                    @endif
 
                     <p style="color:#4b5563; margin-bottom: 18px;">
                         Enter the 6-digit verification code sent to your email.

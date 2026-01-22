@@ -3,6 +3,12 @@ set -e
 
 cd /var/www/html
 
+php artisan optimize:clear || true
+php artisan config:clear || true
+php artisan cache:clear || true
+
+
+
 # --- Make folders first ---
 umask 0002
 mkdir -p storage/framework/cache/data \
