@@ -447,7 +447,16 @@ document.getElementById('signupForm')?.addEventListener('submit', async (e) => {
         });
         const data = await response.json();
         if (response.ok) {
-            window.location.href = data.redirect_url || '{{ route("home") }}';
+            // Always redirect to the verification page if provided.
+            // If the server failed to send the verification email, append a query flag
+            // so the verify page can show an instruction to resend.
+            let dest = data.redirect_url || '{{ route("home") }}';
+            if (data.verification_required && !data.verification_sent) {
+                // add query param to indicate send failure
+                const sep = dest.includes('?') ? '&' : '?';
+                dest = dest + sep + 'mail_send=failed';
+            }
+            window.location.href = dest;
         } else if (response.status === 422 && data.errors) {
             // Highlight fields with validation errors and show the first message
             let firstMsg = '';

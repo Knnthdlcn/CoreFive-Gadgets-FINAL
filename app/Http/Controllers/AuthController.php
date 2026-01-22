@@ -170,10 +170,11 @@ class AuthController extends Controller
             'id' => $user->id,
             'email' => $user->email,
             'verification_required' => true,
+            'verification_sent' => (bool) $otpSent,
             'redirect_url' => route('verification.notice'),
             'message' => $otpSent
                 ? 'Account created. We sent a 6-digit verification code to your email.'
-                : 'Account created. Please resend the verification code on the Verify Email page.',
+                : 'Account created. We were unable to send the verification email — you can resend the code on the Verify Email page.',
         ], 201);
     }
 

@@ -208,3 +208,22 @@ Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function ()
     Route::delete('/categories/{category}', [AdminController::class, 'destroyCategory'])->name('categories.destroy');
 });
 
+// Debug helpers (only enabled in local / debug mode)
+if (config('app.debug')) {
+    use App\Services\EmailVerificationOtpService;
+    use App\Models\User;
+    Route::post('/debug/send-otp', function (\Illuminate\Http\Request $request) {
+        $request->validate(['email' => 'required|email']);
+        $user = User::where('email', $request->input('email'))->first();
+        if (!$user) {
+            return response()->json(['ok' => false, 'message' => "User not found"], 404);
+        }
+        try {
+            $ok = app(EmailVerificationOtpService::class)->send($user, true);
+            return response()->json(['ok' => $ok]);
+        } catch (\Throwable $e) {
+            return response()->json(['ok' => false, 'message' => $e->getMessage()], 500);
+        }
+    })->name('debug.send-otp');
+}
+

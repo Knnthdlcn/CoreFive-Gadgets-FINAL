@@ -64,6 +64,12 @@ class EmailVerificationOtpService
                 'message' => $e->getMessage(),
                 'to' => $user->email,
             ]);
+            // If mailer fails, also write a short file to storage/logs for quick inspection
+            try {
+                \file_put_contents(storage_path('logs/mail-send-fail.log'), now()->toDateTimeString() . " - {$user->email} - " . $e->getMessage() . PHP_EOL, FILE_APPEND | LOCK_EX);
+            } catch (\Throwable $__) {
+                // ignore failures writing the debug file
+            }
             return false;
         }
     }
