@@ -1,19 +1,19 @@
 <!-- Login Modal -->
-<div class="modal fade" id="loginModal" tabindex="-1" style="z-index: 1050;">
-    <div class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-2 sm:p-0 overflow-y-auto" style="padding: 16px;">
-        <div class="w-full max-w-md max-h-[90vh] overflow-hidden rounded-xl bg-white modal-content" style="border: none; border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25); max-height:90vh; overflow:hidden;">
+<div class="modal fade" id="loginModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+        <div class="modal-content" style="border: none; border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);">
             <!-- Header with gradient background -->
-            <div class="modal-header" style="background: linear-gradient(135deg, #06131a 0%, #1a3a52 100%); border: none; border-radius: 16px 16px 0 0; padding: 32px 28px 24px;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #06131a 0%, #1a3a52 100%); border: none; border-radius: 16px 16px 0 0; padding: 20px 20px 14px;">
                 <div>
-                    <h5 class="modal-title" style="color: white; font-size: 1.6rem; font-weight: 700; margin: 0;">Welcome Back</h5>
-                    <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem; margin: 6px 0 0 0;">Sign in to your account</p>
+                    <h5 class="modal-title" style="color: white; font-size: 1rem; font-weight: 700; margin: 0;">Welcome Back</h5>
+                    <p style="color: rgba(255, 255, 255, 0.8); font-size: 0.85rem; margin: 6px 0 0 0;">Sign in to your account</p>
                 </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" style="opacity: 0.7;"></button>
             </div>
             
             <form id="loginForm">
                 @csrf
-                <div class="modal-body" style="padding: 28px; overflow-y: auto; max-height: calc(90vh - 120px); -webkit-overflow-scrolling: touch;">
+                <div class="modal-body" style="padding: 28px;">
                     <!-- Error Alert -->
                     <div id="loginErrorAlert" style="display: none; margin-bottom: 20px; padding: 14px 16px; background: #fee; border: 1px solid #fcc; border-radius: 10px; color: #c33; font-size: 0.93rem; animation: slideDown 0.3s ease;">
                         <div style="display: flex; align-items: flex-start; gap: 10px;">
@@ -52,7 +52,7 @@
                 </div>
 
                 <!-- Footer -->
-                <div class="modal-footer" style="border-top: 1px solid #f0f0f0; padding: 20px 28px; background: transparent; position: sticky; bottom: 0; z-index: 10;">
+                <div class="modal-footer" style="border-top: 1px solid #f0f0f0; padding: 20px 28px; background: transparent;">
                     <button type="submit" class="btn w-100" style="background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%); color: white; border: none; font-weight: 600; padding: 12px 20px; border-radius: 10px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(21, 101, 192, 0.3);">
                         <i class="fas fa-sign-in-alt me-2"></i>Sign In
                     </button>
@@ -71,21 +71,29 @@
 </div>
 
 <!-- Signup Modal -->
-<div class="modal fade" id="signupModal" tabindex="-1" style="z-index: 1050;">
-    <div class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-2 sm:p-0 overflow-y-auto" style="padding: 16px;">
-        <div class="w-full max-w-lg max-h-[90vh] overflow-hidden rounded-xl bg-white modal-content" style="border: none; border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25); max-height:90vh; overflow:hidden;">
+<style>
+@media (max-width: 480px) {
+    #signupModal .modal-header { padding: 12px 14px 10px !important; }
+    #signupModal .modal-title { font-size: 1rem !important; }
+    #signupModal .modal-header p { font-size: 0.8rem !important; color: rgba(255,255,255,0.85) !important; margin-top:4px !important; }
+    #signupModal .modal-content { max-height: 94vh; }
+}
+</style>
+<div class="modal fade" id="signupModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
+        <div class="modal-content" style="border: none; border-radius: 16px; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25); max-height: 90vh; overflow-y: auto;">
             <!-- Header with gradient background -->
-            <div class="modal-header" style="background: linear-gradient(135deg, #06131a 0%, #1a3a52 100%); border: none; border-radius: 16px 16px 0 0; padding: 32px 28px 24px; position: sticky; top: 0; z-index: 10;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #06131a 0%, #1a3a52 100%); border: none; border-radius: 16px 16px 0 0; padding: 20px 18px 12px; position: sticky; top: 0; z-index: 10;">
                 <div>
-                    <h5 class="modal-title" style="color: white; font-size: 1.6rem; font-weight: 700; margin: 0;">Create Your Account</h5>
-                    <p style="color: rgba(255, 255, 255, 0.7); font-size: 0.9rem; margin: 6px 0 0 0;">Join CoreFive Gadgets and start shopping</p>
+                    <h5 class="modal-title" style="color: white; font-size: 1rem; font-weight: 700; margin: 0;">Create Your Account</h5>
+                    <p style="color: rgba(255, 255, 255, 0.85); font-size: 0.85rem; margin: 4px 0 0 0;">Join CoreFive Gadgets and start shopping</p>
                 </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" style="opacity: 0.7;"></button>
             </div>
             
             <form id="signupForm" autocomplete="off">
                 @csrf
-                <div class="modal-body" style="padding: 28px; overflow-y: auto; max-height: calc(90vh - 120px); -webkit-overflow-scrolling: touch;">
+                <div class="modal-body" style="padding: 28px;">
                     <!-- Error Alert -->
                     <div id="signupErrorAlert" style="display: none; margin-bottom: 20px; padding: 14px 16px; background: #fee; border: 1px solid #fcc; border-radius: 10px; color: #c33; font-size: 0.93rem; animation: slideDown 0.3s ease;">
                         <div style="display: flex; align-items: flex-start; gap: 10px;">
@@ -211,7 +219,7 @@
                 </div>
 
                 <!-- Footer -->
-                <div class="modal-footer" style="border-top: 1px solid #f0f0f0; padding: 20px 28px; background: transparent; position: sticky; bottom: 0; z-index: 10;">
+                <div class="modal-footer" style="border-top: 1px solid #f0f0f0; padding: 20px 28px; background: transparent;">
                     <button type="submit" class="btn w-100" style="background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%); color: white; border: none; font-weight: 600; padding: 12px 20px; border-radius: 10px; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(21, 101, 192, 0.3);">
                         <i class="fas fa-user-plus me-2"></i>Create Account
                     </button>
@@ -230,29 +238,6 @@
 </div>
 
 <script src="{{ asset('js/ph-address.js') }}"></script>
-
-<style>
-@media (max-width: 640px) {
-    .modal.fade.show, .modal.fade.in {
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-    }
-    body.modal-open {
-        overflow: hidden !important;
-        touch-action: none;
-    }
-    .modal-content {
-        max-height: 90vh !important;
-        overflow: hidden !important;
-    }
-    .modal-body {
-        overflow-y: auto !important;
-        max-height: calc(90vh - 120px) !important;
-        -webkit-overflow-scrolling: touch !important;
-    }
-}
-</style>
 
 <script>
 function switchToLogin(e) {

@@ -381,7 +381,55 @@
         }
     </style>
     
+</style>
     @stack('styles')
+
+    <style>
+        /* Global override to ensure modal headers are compact across the site */
+        .modal .modal-header { padding: 10px 14px !important; }
+        .modal .modal-title { font-size: 1rem !important; line-height: 1.1 !important; }
+        #signupModal .modal-header, #loginModal .modal-header { padding-top: 8px !important; padding-bottom: 8px !important; }
+        /* Slightly shrink the big Google button inside modals to save vertical space */
+        .modal .btn.w-100 { padding: 10px 12px !important; font-size: 0.95rem !important; }
+        @media (max-width: 480px) {
+            .modal .modal-title { font-size: 0.95rem !important; }
+            .modal .modal-header { padding: 8px 10px !important; }
+            .modal .btn.w-100 { padding: 9px 10px !important; font-size: 0.92rem !important; }
+            .modal .modal-content { max-height: 96vh !important; }
+        }
+
+        /* Extra small devices: ensure modal sits above fixed topbar and is compact */
+        @media (max-width: 420px) {
+            /* place modal above the fixed mobile topbar */
+            .modal { z-index: 1400 !important; }
+            .modal-backdrop { z-index: 1350 !important; }
+
+            /* make header non-sticky so content can scroll and header stays visible */
+            #signupModal .modal-header,
+            #loginModal .modal-header {
+                position: static !important;
+                top: auto !important;
+                padding-top: 6px !important;
+                padding-bottom: 6px !important;
+            }
+
+            #signupModal .modal-title,
+            #loginModal .modal-title {
+                font-size: 0.92rem !important;
+                line-height: 1.05 !important;
+            }
+
+            #signupModal .modal-body,
+            #loginModal .modal-body {
+                padding: 14px !important;
+            }
+
+            .modal .form-control { padding: 10px 12px !important; font-size: 0.9rem !important; }
+            .modal .mb-4 { margin-bottom: 12px !important; }
+            .modal .btn.w-100 { padding: 8px 10px !important; font-size: 0.9rem !important; }
+            .modal .modal-content { max-height: 98vh !important; margin: 8px !important; }
+        }
+    </style>
 </head>
 <body>
     <!-- MOBILE TOP HEADER (portrait/mobile) -->
