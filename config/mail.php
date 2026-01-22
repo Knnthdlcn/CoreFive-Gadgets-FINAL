@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'default' => env('MAIL_MAILER', 'log'),
+    'default' => env('MAIL_MAILER', 'smtp'),
 
 
     /*
@@ -96,11 +96,6 @@ return [
                 'postmark',
             ],
             'retry_after' => 60,
-        ],
-
-        'sendgrid' => [
-             'transport' => 'sendgrid',
-             'dsn' => env('MAILER_DSN'),
         ],
 
     ],
