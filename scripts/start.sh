@@ -3,6 +3,16 @@ set -e
 
 cd /var/www/html
 
+
+php artisan storage:link || true
+
+mkdir -p storage/app/public/products
+mkdir -p storage/app/public/avatars
+
+chown -R www-data:www-data storage bootstrap/cache || true
+chmod -R 775 storage bootstrap/cache || true
+
+
 php artisan config:clear || true
 php artisan cache:clear || true
 php artisan optimize:clear || true

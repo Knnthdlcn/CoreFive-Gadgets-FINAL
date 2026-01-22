@@ -164,7 +164,10 @@ class AdminController extends Controller
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $imageName = time() . '_' . $image->getClientOriginalName();
-            $image->move(public_path('images'), $imageName);
+            $path = $request->file('image')->store('products', 'public');
+            $product->image = $path;
+            $product->save();
+
             $validated['image_path'] = 'images/' . $imageName;
         }
         unset($validated['image']);
@@ -220,7 +223,9 @@ class AdminController extends Controller
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $imageName = time() . '_' . $image->getClientOriginalName();
-            $image->move(public_path('images'), $imageName);
+            $path = $request->file('image')->store('products', 'public');
+            $product->image = $path;
+            $product->save();
             $validated['image_path'] = 'images/' . $imageName;
         }
         unset($validated['image']);

@@ -171,6 +171,7 @@
                 <div class="card border-0 shadow-sm text-center" style="border-radius: 12px;">
                     <div class="card-body" style="padding: 32px;">
                         <form action="{{ route('profile.photo') }}" method="POST" enctype="multipart/form-data" id="photoForm">
+                            <img src="{{ asset('storage/' . $user->avatar) }}">
                             @csrf
                             @method('PUT')
                             <div class="mb-3">

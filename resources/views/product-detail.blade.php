@@ -10,7 +10,7 @@
             <div class="col-md-5">
                 <div style="position: sticky; top: 70px;">
                     <div style="background: #f8f9fa; border-radius: 12px; padding: 20px;">
-                        <img src="{{ asset($product->image_path ?? 'images/placeholder.png') }}" 
+                        <img src="{{ asset('storage/' . $product->image) }}" 
                              alt="{{ $product->product_name }}" 
                              class="img-fluid rounded"
                              style="width: 100%; height: auto; display: block;">
