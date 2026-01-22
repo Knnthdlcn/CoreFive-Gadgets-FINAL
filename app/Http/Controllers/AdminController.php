@@ -728,6 +728,57 @@ class AdminController extends Controller
     }
 
     /**
+     * Permanently delete a user that has been banned.
+     */
+    public function forceDestroyUser(User $user)
+    {
+        // Prevent removing admin accounts or the currently logged-in admin.
+        if (($user->role ?? 'customer') === 'admin') {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'You cannot permanently delete an admin account.');
+        }
+
+        if (auth('admin')->check() && auth('admin')->id() === $user->id) {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'You cannot delete the account you are currently using.');
+        }
+
+        if (empty($user->banned_at)) {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'Only banned users may be permanently deleted.');
+        }
+
+        DB::transaction(function () use ($user) {
+            // Delete related sessions and password resets first
+            DB::table('sessions')->where('user_id', $user->id)->delete();
+            DB::table('password_reset_tokens')->where('email', $user->email)->delete();
+            // Finally delete the user record
+            $user->delete();
+        });
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User permanently deleted.');
+    }
+
+    /**
+     * Promote a regular user to admin.
+     */
+    public function makeAdmin(User $user)
+    {
+        if (($user->role ?? 'customer') === 'admin') {
+            return redirect()->route('admin.users.index')
+                ->with('error', 'User is already an admin.');
+        }
+
+        // Prevent promoting yourself if you are already admin (no-op) — allow though.
+        $user->role = 'admin';
+        $user->save();
+
+        return redirect()->route('admin.users.index')
+            ->with('success', 'User promoted to admin successfully!');
+    }
+
+    /**
      * Show list of categories
      */
     public function indexCategories()

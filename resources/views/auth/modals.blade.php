@@ -448,6 +448,74 @@ document.getElementById('signupForm')?.addEventListener('submit', async (e) => {
         const data = await response.json();
         if (response.ok) {
             window.location.href = data.redirect_url || '{{ route("home") }}';
+        } else if (response.status === 422 && data.errors) {
+            // Highlight fields with validation errors and show the first message
+            let firstMsg = '';
+            for (const field in data.errors) {
+                const messages = data.errors[field];
+                if (!messages || !messages.length) continue;
+                const inputMap = {
+                    firstName: 'firstName',
+                    lastName: 'lastName',
+                    email: 'signupEmail',
+                    password: 'signupPassword',
+                    password_confirmation: 'signupPasswordConfirm',
+                    contact: 'contact'
+                };
+                const inputId = inputMap[field] || field;
+                const el = document.getElementById(inputId);
+                if (el) {
+                    el.style.borderColor = '#dc3545';
+                    el.style.background = '#fff5f5';
+                }
+                if (!firstMsg) firstMsg = messages[0];
+            }
+
+            // If the email is already taken, offer to resend verification (guest flow)
+            if (data.errors.email && data.errors.email.join(' ').toLowerCase().includes('taken')) {
+                const alertMsg = firstMsg + ' If this is your account and you haven\'t verified your email, you can resend the verification code.';
+                showSignupError(alertMsg);
+
+                // Add a resend button under the alert (avoid duplicates)
+                if (!document.getElementById('resendVerificationBtn')) {
+                    const resend = document.createElement('button');
+                    resend.id = 'resendVerificationBtn';
+                    resend.type = 'button';
+                    resend.className = 'btn btn-outline-primary w-100 mt-3';
+                    resend.textContent = 'Resend verification code';
+                    resend.addEventListener('click', async () => {
+                        try {
+                            resend.disabled = true;
+                            resend.textContent = 'Sending...';
+                            const form = new FormData();
+                            form.append('email', email);
+                            const r = await fetch('{{ route("verification.guest.send") }}', {
+                                method: 'POST',
+                                body: form,
+                                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': '{{ csrf_token() }}' }
+                            });
+                            const j = await r.json();
+                            if (r.ok) {
+                                // redirect to guest verification notice
+                                window.location.href = '{{ route("verification.guest.notice") }}';
+                            } else {
+                                showSignupError(j.message || 'Unable to resend verification code.');
+                                resend.disabled = false;
+                                resend.textContent = 'Resend verification code';
+                            }
+                        } catch (err) {
+                            showSignupError('An error occurred while sending the verification code.');
+                            resend.disabled = false;
+                            resend.textContent = 'Resend verification code';
+                        }
+                    });
+
+                    const footer = document.querySelector('#signupForm .modal-footer') || document.querySelector('#signupForm');
+                    if (footer) footer.parentNode.insertBefore(resend, footer.nextSibling);
+                }
+            } else {
+                showSignupError(firstMsg || 'Signup failed. Please check your input.');
+            }
         } else {
             showSignupError(data.message || 'Signup failed. Email may already be in use.');
         }

@@ -194,6 +194,10 @@ Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function ()
     Route::get('/users/{user}', [AdminController::class, 'showUser'])->name('users.show');
     Route::delete('/users/{user}', [AdminController::class, 'destroyUser'])->name('users.destroy');
     Route::patch('/users/{user}/restore', [AdminController::class, 'restoreUser'])->name('users.restore');
+    // Permanently delete a banned user
+    Route::delete('/users/{user}/force', [AdminController::class, 'forceDestroyUser'])->name('users.force-destroy');
+    // Promote a user to admin
+    Route::post('/users/{user}/make-admin', [AdminController::class, 'makeAdmin'])->name('users.make-admin');
     
     // Categories management
     Route::get('/categories', [AdminController::class, 'indexCategories'])->name('categories.index');

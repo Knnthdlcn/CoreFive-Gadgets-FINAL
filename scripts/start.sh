@@ -24,9 +24,9 @@ fi
 
 # --- Laravel caches (safe) ---
 php artisan optimize:clear || true
-php artisan config:cache || true
-php artisan route:cache  || true
-php artisan view:cache   || true
+#php artisan config:cache || true
+#php artisan route:cache  || true
+#php artisan view:cache   || true
 
 # --- Run migrations (safe-ish) ---
 php artisan migrate --force || true

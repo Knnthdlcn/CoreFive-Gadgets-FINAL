@@ -49,8 +49,15 @@
                                 <a href="{{ route('admin.users.show', $user) }}" class="btn btn-sm btn-admin btn-admin-primary">
                                     <i class="fas fa-eye"></i> View
                                 </a>
-
                                 @if(($user->role ?? 'customer') !== 'admin')
+                                    {{-- Make Admin button --}}
+                                    <form action="{{ route('admin.users.make-admin', $user) }}" method="POST" style="display: inline; margin-right:6px;">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-admin" style="background:#6b7280;color:#fff;">
+                                            <i class="fas fa-user-shield"></i> Make Admin
+                                        </button>
+                                    </form>
+
                                     @if(empty($user->banned_at))
                                         <form action="{{ route('admin.users.destroy', $user) }}" method="POST" style="display: inline;" class="ban-form" data-user-name="{{ $user->first_name }} {{ $user->last_name }}">
                                             @csrf
@@ -60,14 +67,24 @@
                                             </button>
                                         </form>
                                     @else
-                                        <form action="{{ route('admin.users.restore', $user) }}" method="POST" style="display: inline;" class="restore-form" data-user-name="{{ $user->first_name }} {{ $user->last_name }}">
+                                        <form action="{{ route('admin.users.restore', $user) }}" method="POST" style="display: inline; margin-right:6px;" class="restore-form" data-user-name="{{ $user->first_name }} {{ $user->last_name }}">
                                             @csrf
                                             @method('PATCH')
                                             <button type="submit" class="btn btn-sm btn-admin" style="background:#16a34a;color:#fff;">
                                                 <i class="fas fa-undo"></i> Unban
                                             </button>
                                         </form>
+
+                                        <form action="{{ route('admin.users.force-destroy', $user) }}" method="POST" style="display: inline;" class="force-delete-form" data-user-name="{{ $user->first_name }} {{ $user->last_name }}">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" class="btn btn-sm btn-admin btn-admin-danger force-delete-btn" style="background:#b91c1c;color:#fff;">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
+                                        </form>
                                     @endif
+                                @else
+                                    {{-- Admin badge shown earlier; allow demote in future if needed --}}
                                 @endif
                             </td>
                         </tr>
@@ -127,7 +144,7 @@
             if (confirmState.initialized) return;
 
             confirmState.overlay = document.getElementById('confirmOverlay');
-            const userNameSpan = document.getElementById('confirmUserName');
+            let userNameSpan = document.getElementById('confirmUserName');
             const cancelBtn = document.getElementById('confirmCancel');
             const deleteBtn = document.getElementById('confirmDelete');
 
@@ -138,10 +155,28 @@
                 confirmState.activeForm = null;
             }
 
-            function openModal(form) {
+            function openModal(form, action = 'ban') {
                 if (!form) return;
                 confirmState.activeForm = form;
                 userNameSpan.textContent = form.dataset.userName || 'this user';
+                // Adjust copy/button for action
+                const titleEl = document.querySelector('.confirm-title');
+                const bodyEl = document.querySelector('.confirm-body');
+                if (action === 'delete') {
+                    titleEl.textContent = 'Delete user';
+                    bodyEl.innerHTML = 'You are about to <strong>permanently delete</strong> <span id="confirmUserName" style="font-weight:700;"></span>. This cannot be undone.';
+                    deleteBtn.textContent = 'Delete';
+                    deleteBtn.style.background = '#b91c1c';
+                } else {
+                    titleEl.textContent = 'Ban user';
+                    bodyEl.innerHTML = 'You are about to temporarily disable <span id="confirmUserName" style="font-weight:700;"></span>. You can restore the account anytime.';
+                    deleteBtn.textContent = 'Ban';
+                    deleteBtn.style.background = '#e74c3c';
+                }
+
+                // re-query the username span because we may have replaced the innerHTML above
+                userNameSpan = document.getElementById('confirmUserName');
+
                 confirmState.overlay.classList.remove('hidden');
                 deleteBtn.focus();
             }
@@ -176,7 +211,14 @@
                 if (banBtnClicked && !e.defaultPrevented) {
                     e.preventDefault();
                     const form = banBtnClicked.closest('.ban-form');
-                    if (form) openModal(form);
+                    if (form) openModal(form, 'ban');
+                }
+
+                const deleteBtnClicked = e.target.closest('.force-delete-btn');
+                if (deleteBtnClicked && !e.defaultPrevented) {
+                    e.preventDefault();
+                    const form = deleteBtnClicked.closest('.force-delete-form');
+                    if (form) openModal(form, 'delete');
                 }
             }, true);
 
