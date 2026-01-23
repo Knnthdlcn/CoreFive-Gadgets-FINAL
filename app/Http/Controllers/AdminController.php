@@ -57,45 +57,21 @@ class AdminController extends Controller
     /**
      * Display the admin dashboard with key statistics
      */
-    public function dashboard()
+    public function dashboard(Request $request)
     {
-            // Use configured default filesystem disk (supports s3 or local `public`).
-            $disk = config('filesystems.default') ?: env('FILESYSTEM_DISK', 'public');
-            $path = $request->file('image')->store('products', $disk);
+        // Basic admin stats shown on the dashboard. Keep this method focused
+        // on aggregations so it cannot fail due to unrelated file operations.
         $stats = [
             'total_products' => Product::count(),
             'total_orders' => Order::count(),
             'total_users' => User::count(),
             // Include archived (soft-deleted) messages in total.
             'total_contacts' => Contact::withTrashed()->count(),
-            // Revenue based on placed orders (excludes cancelled)
-            // If using local public disk, copy file into public/images for legacy access
-            if ($disk === 'public') {
-                $src = Storage::disk('public')->path($path);
-                $dest = $publicImagesDir . DIRECTORY_SEPARATOR . $filename;
-                try {
-                    if (File::exists($src) && !File::exists($dest)) {
-                        File::copy($src, $dest);
-                    }
-                } catch (\Throwable $e) {
-                    // Non-fatal; continue but keep storage path as fallback
-                }
+        ];
 
-                // Prefer public disk URL (storage symlink)
-                try {
-                    $validated['image_path'] = Storage::disk('public')->url($path);
-                } catch (\Throwable $__e) {
-                    $validated['image_path'] = 'images/' . $filename;
-                }
-            } else {
-                // For cloud disks (s3), use disk URL directly
-                try {
-                    $validated['image_path'] = Storage::disk($disk)->url($path);
-                } catch (\Throwable $__e) {
-                    // As a fallback, store the storage path
-                    $validated['image_path'] = $path;
-                }
-            }
+        // Show recent orders and contacts for quick access in the admin UI.
+        $recent_orders = Order::with('user')->latest('created_at')->take(10)->get();
+        $recent_contacts = Contact::latest('created_at')->take(10)->get();
 
         return view('admin.dashboard', compact('stats', 'recent_orders', 'recent_contacts'));
     }
