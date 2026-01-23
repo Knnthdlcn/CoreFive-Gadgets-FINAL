@@ -244,8 +244,14 @@ class AdminController extends Controller
                 // Non-fatal; continue but keep storage path as fallback
             }
 
-            // Prefer public images path for site visitors
-            $validated['image_path'] = 'images/' . $filename;
+            // Prefer using the `public` disk URL (requires `php artisan storage:link`)
+            // e.g. /storage/products/filename.jpg which is served via the public/storage symlink.
+            try {
+                $validated['image_path'] = Storage::disk('public')->url($path);
+            } catch (\Throwable $__e) {
+                // Fallback to public/images copy (older behavior)
+                $validated['image_path'] = 'images/' . $filename;
+            }
         }
         unset($validated['image']);
 
@@ -324,8 +330,13 @@ class AdminController extends Controller
                 // ignore copy failure
             }
 
-            // Use public images path so visitors can access it directly
-            $validated['image_path'] = 'images/' . $filename;
+            // Prefer using the `public` disk URL (requires `php artisan storage:link`)
+            try {
+                $validated['image_path'] = Storage::disk('public')->url($path);
+            } catch (\Throwable $__e) {
+                // Fallback to public/images copy (older behavior)
+                $validated['image_path'] = 'images/' . $filename;
+            }
         }
         unset($validated['image']);
 

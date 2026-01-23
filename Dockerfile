@@ -61,8 +61,8 @@ RUN chmod +x /start.sh
 RUN sed -i 's|listen = 9000|listen = 127.0.0.1:9000|g' /usr/local/etc/php-fpm.d/zz-docker.conf
 
 # Permissions
-RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache \
- && chown -R www-data:www-data storage bootstrap/cache \
- && chmod -R 775 storage bootstrap/cache
+RUN mkdir -p storage/framework/cache storage/framework/sessions storage/framework/views storage/logs bootstrap/cache public/images \
+ && chown -R www-data:www-data storage bootstrap/cache public/images \
+ && chmod -R 775 storage bootstrap/cache public/images
 
 CMD ["/start.sh"]

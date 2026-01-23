@@ -4,6 +4,16 @@ set -e
 cd /var/www/html
 
 
+# Ensure storage and public image folders exist before linking
+umask 0002
+mkdir -p storage/app/public/products
+mkdir -p storage/app/public/avatars
+mkdir -p public/images
+
+chown -R www-data:www-data storage bootstrap/cache public/images || true
+chmod -R 775 storage bootstrap/cache public/images || true
+
+
 if command -v npm >/dev/null 2>&1; then
   echo "npm found, running frontend install/build..."
   npm ci --silent && npm run build --silent || true
@@ -52,19 +62,10 @@ else
   else
     echo "composer not available after installer attempt; skipping render-deploy. Install composer in build image or run `composer run render-deploy` during deploy."
   fi
-fi
-
 
 php artisan storage:link || true
 php scripts/fix_deployed_images.php || true
 php artisan migrate --force || true
-
-
-mkdir -p storage/app/public/products
-mkdir -p storage/app/public/avatars
-
-chown -R www-data:www-data storage bootstrap/cache || true
-chmod -R 775 storage bootstrap/cache || true
 
 
 php artisan config:clear || true
