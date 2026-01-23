@@ -186,6 +186,15 @@ E-Commerce-Laravel/
 7. Setup SSL certificate
 8. Configure database backups
 
+### Storage / Uploaded Images
+
+- By default the app uses the local `public` disk (`storage/app/public`) and the `public/storage` symlink. On Render or other container platforms use one of the following:
+	- Keep using the `public` disk and ensure `php artisan storage:link` runs and a persistent volume is attached to `/var/www/html/storage` (or use Render Persistent Disk).
+	- Or use S3-compatible object storage (recommended). Set the following in your `.env` and restart the app:
+		- `FILESYSTEM_DISK=s3`
+		- `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET`, `AWS_URL` (optional)
+	- After changing storage driver, run `php artisan config:clear` and test uploads.
+
 ### Performance Tips
 - Cache compiled views: `php artisan view:cache`
 - Cache configuration: `php artisan config:cache`

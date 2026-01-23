@@ -81,30 +81,43 @@ class ProductController extends Controller
 ]);
 
 if ($request->hasFile('image')) {
-    // Store on the `public` disk (storage/app/public/products/...)
-    $path = $request->file('image')->store('products', 'public');
+    // Use configured default filesystem disk
+    $disk = config('filesystems.default') ?: env('FILESYSTEM_DISK', 'public');
+    $path = $request->file('image')->store('products', $disk);
     $filename = basename($path);
 
-    // Ensure public/images exists
+    // Ensure public/images exists for local fallback
     $publicImagesDir = public_path('images');
     if (!File::exists($publicImagesDir)) {
         File::makeDirectory($publicImagesDir, 0755, true);
     }
 
-    // Copy the stored file to public/images so it's web-accessible immediately
-    $src = Storage::disk('public')->path($path);
-    $dest = $publicImagesDir . DIRECTORY_SEPARATOR . $filename;
-    try {
-        if (File::exists($src) && !File::exists($dest)) {
-            File::copy($src, $dest);
+    if ($disk === 'public') {
+        $src = Storage::disk('public')->path($path);
+        $dest = $publicImagesDir . DIRECTORY_SEPARATOR . $filename;
+        try {
+            if (File::exists($src) && !File::exists($dest)) {
+                File::copy($src, $dest);
+            }
+        } catch (\Throwable $e) {
+            // Non-fatal; fall back
         }
-    } catch (\Throwable $e) {
-        // Non-fatal; fall back to storage path if copy fails
+        try {
+            $validated['image_path'] = Storage::disk('public')->url($path);
+        } catch (\Throwable $__e) {
+            $validated['image_path'] = 'images/' . $filename;
+        }
+    } else {
+        try {
+            $validated['image_path'] = Storage::disk($disk)->url($path);
+        } catch (\Throwable $__e) {
+            $validated['image_path'] = $path;
+        }
     }
-
-    // Prefer public images path for visitors
-    $validated['image_path'] = 'images/' . $filename;
 }
+
+// Remove the raw uploaded file field before creating the product record
+unset($validated['image']);
 
         try {
             Product::create($validated);

@@ -63,6 +63,8 @@ else
     echo "composer not available after installer attempt; skipping render-deploy. Install composer in build image or run `composer run render-deploy` during deploy."
   fi
 
+fi
+
 php artisan storage:link || true
 php scripts/fix_deployed_images.php || true
 php artisan migrate --force || true

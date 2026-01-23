@@ -59,8 +59,9 @@ class AdminController extends Controller
      */
     public function dashboard()
     {
-        $revenueQuery = Order::query()->where('status', '!=', 'cancelled');
-
+            // Use configured default filesystem disk (supports s3 or local `public`).
+            $disk = config('filesystems.default') ?: env('FILESYSTEM_DISK', 'public');
+            $path = $request->file('image')->store('products', $disk);
         $stats = [
             'total_products' => Product::count(),
             'total_orders' => Order::count(),
@@ -68,24 +69,33 @@ class AdminController extends Controller
             // Include archived (soft-deleted) messages in total.
             'total_contacts' => Contact::withTrashed()->count(),
             // Revenue based on placed orders (excludes cancelled)
-            'total_revenue' => (float) $revenueQuery->sum('total'),
-            'pending_orders' => Order::where('status', 'pending')->count(),
-            'completed_orders' => Order::where('status', 'completed')->count(),
-            'processing_orders' => Order::where('status', 'processing')->count(),
-            'shipped_orders' => Order::where('status', 'shipped')->count(),
-            'cancelled_orders' => Order::where('status', 'cancelled')->count(),
-            // Contacts table uses `status` enum: new/read/responded
-            'unread_contacts' => Contact::where('status', 'new')->count(),
-        ];
+            // If using local public disk, copy file into public/images for legacy access
+            if ($disk === 'public') {
+                $src = Storage::disk('public')->path($path);
+                $dest = $publicImagesDir . DIRECTORY_SEPARATOR . $filename;
+                try {
+                    if (File::exists($src) && !File::exists($dest)) {
+                        File::copy($src, $dest);
+                    }
+                } catch (\Throwable $e) {
+                    // Non-fatal; continue but keep storage path as fallback
+                }
 
-        $recent_orders = Order::with('user')
-            ->latest('created_at')
-            ->take(5)
-            ->get();
-
-        $recent_contacts = Contact::latest('created_at')
-            ->take(5)
-            ->get();
+                // Prefer public disk URL (storage symlink)
+                try {
+                    $validated['image_path'] = Storage::disk('public')->url($path);
+                } catch (\Throwable $__e) {
+                    $validated['image_path'] = 'images/' . $filename;
+                }
+            } else {
+                // For cloud disks (s3), use disk URL directly
+                try {
+                    $validated['image_path'] = Storage::disk($disk)->url($path);
+                } catch (\Throwable $__e) {
+                    // As a fallback, store the storage path
+                    $validated['image_path'] = $path;
+                }
+            }
 
         return view('admin.dashboard', compact('stats', 'recent_orders', 'recent_contacts'));
     }
