@@ -72,7 +72,7 @@
                             <div class="card product-card h-100 border-0 shadow-sm" style="transition: all 0.3s ease; border-radius: 12px; overflow: hidden; background: #ffffff;">
                                 <a href="{{ route('product.show', $product->product_id) }}" class="text-decoration-none">
                                     <div class="card-img-wrapper position-relative overflow-hidden" style="height: 280px; background: #ffffff; cursor: pointer; border: 1px solid #f0f0f0;">
-                                        <img src="{{ asset('storage/'.$product->image) }}" class="card-img-top w-100 h-100" alt="{{ $product->product_name }}" style="object-fit: contain; padding: 10px; transition: transform 0.3s ease;" onerror="this.onerror=null; this.src='/images/'+this.src.split('/').pop();">
+                                        <img src="{{ $product->image_url }}" class="card-img-top w-100 h-100" alt="{{ $product->product_name }}" style="object-fit: contain; padding: 10px; transition: transform 0.3s ease;" onerror="this.onerror=null; this.src='/images/'+(this.getAttribute('data-filename')||this.src.split('/').pop());" data-filename="{{ basename($product->image_path ?? ($product->image ?? '')) }}">
                                         <div class="overlay position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" style="background: rgba(0, 0, 0, 0); transition: background 0.3s ease; pointer-events: none;">
                                             <span class="badge bg-dark text-white px-3 py-2" style="opacity: 0; transition: opacity 0.3s ease;">
                                                 <i class="fas fa-eye me-1"></i> View Details

@@ -54,6 +54,15 @@
         </style>
     @endif
 
+    @if(!empty($dbError) && (config('app.debug') || auth('admin')->check()))
+        <div class="container mt-3">
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <strong>Notice:</strong> The database appears unavailable or not migrated. The homepage is showing no products.
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    @endif
+
     <!-- MOBILE (portrait) HOME UI -->
     <section class="d-lg-none" style="background: #f3f4f6;">
         <div class="container pt-3">

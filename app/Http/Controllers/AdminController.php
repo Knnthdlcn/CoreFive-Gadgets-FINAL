@@ -121,8 +121,8 @@ class AdminController extends Controller
         return response()->json([
             'requested' => $file,
             'filename' => $filename,
-            'public_path' => str_replace('\\\', '/', $publicPath),
-            'storage_path' => str_replace('\\\', '/', $storagePath),
+            'public_path' => str_replace('\\', '/', $publicPath),
+            'storage_path' => str_replace('\\', '/', $storagePath),
             'public_exists' => $publicExists,
             'storage_exists' => $storageExists,
             'db_matches' => $dbMatches,
