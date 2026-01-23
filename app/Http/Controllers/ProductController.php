@@ -106,8 +106,15 @@ if ($request->hasFile('image')) {
     $validated['image_path'] = 'images/' . $filename;
 }
 
-Product::create($validated);
-
+        try {
+            Product::create($validated);
+        } catch (\Illuminate\Database\QueryException $e) {
+            \Log::error('Failed to create product (public): ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Could not save product: database unavailable or misconfigured.');
+        } catch (\Throwable $e) {
+            \Log::error('Failed to create product (public) unexpected: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'An unexpected error occurred while saving the product.');
+        }
 
         return redirect()->route('products.index')->with('success', 'Product added successfully!');
     }

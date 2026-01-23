@@ -255,7 +255,16 @@ class AdminController extends Controller
         $validated['stock_updated_at'] = now();
         $validated['is_featured'] = $request->boolean('is_featured');
 
-        $product = Product::create($validated);
+        try {
+            $product = Product::create($validated);
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Log and return a friendly error so admin doesn't get a 500
+            \Log::error('Failed to create product: ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Could not save product: database unavailable or misconfigured. Check DB settings.');
+        } catch (\Throwable $e) {
+            \Log::error('Failed to create product (unexpected): ' . $e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'An unexpected error occurred while saving the product.');
+        }
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Product created successfully!');

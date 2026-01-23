@@ -18,7 +18,9 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'sqlite'),
+    // Default: prefer explicit DB_CONNECTION, otherwise prefer MySQL when
+    // DB_HOST is present (e.g., Aiven Render env), else fall back to sqlite
+    'default' => env('DB_CONNECTION') ?: (env('DB_HOST') ? 'mysql' : 'sqlite'),
 
     /*
     |--------------------------------------------------------------------------
