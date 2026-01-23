@@ -56,7 +56,7 @@
                                                 aria-label="Select {{ $item['product']->product_name }}"
                                             />
                                         </div>
-                                    <img src="{{ asset($item['product']->image_path ?? 'images/placeholder.png') }}" 
+                                     <img src="{{ $item['product']->image_url }}" 
                                          alt="{{ $item['product']->product_name }}" 
                                          class="cart-item-img">
                                     <div class="flex-grow-1">

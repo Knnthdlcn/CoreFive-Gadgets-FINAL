@@ -166,9 +166,13 @@ class Product extends Model
             $path = ltrim($path, '/');
         
             if (empty($path)) {
-                return asset('images/placeholder.png');
+                // Return a relative placeholder so the host origin is always correct
+                return '/images/placeholder.png';
             }
-        
-            return asset($path);
+
+            // Return a relative path (not absolute URL) so browsers request
+            // the image from the same origin. This avoids incorrect hosts when
+            // `APP_URL` is set to a developer machine.
+            return '/' . ltrim($path, '/');
         }
 }

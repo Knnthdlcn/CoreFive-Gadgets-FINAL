@@ -10,10 +10,10 @@
             <div class="col-md-5">
                 <div style="position: sticky; top: 70px;">
                     <div style="background: #f8f9fa; border-radius: 12px; padding: 20px;">
-                        <img src="{{ asset('storage/' . $product->image) }}" 
-                             alt="{{ $product->product_name }}" 
-                             class="img-fluid rounded"
-                             style="width: 100%; height: auto; display: block;">
+                            <img src="{{ $product->image_url }}" 
+                                alt="{{ $product->product_name }}" 
+                                class="img-fluid rounded"
+                                style="width: 100%; height: auto; display: block;">
                     </div>
                 </div>
             </div>
@@ -167,7 +167,7 @@
                     <a href="{{ route('product.show', $relatedProduct->product_id) }}" class="text-decoration-none">
                         <div class="card h-100 product-card" style="border: 1px solid #e0e0e0; border-radius: 10px; transition: all 0.3s ease; cursor: pointer;">
                             <div class="position-relative" style="overflow: hidden; border-radius: 10px 10px 0 0;">
-                                <img src="{{ asset($relatedProduct->image_path ?? 'images/placeholder.png') }}" 
+                                  <img src="{{ $relatedProduct->image_url }}" 
                                      class="card-img-top" 
                                      alt="{{ $relatedProduct->product_name }}"
                                      style="height: 180px; object-fit: cover; transition: transform 0.3s ease;">
