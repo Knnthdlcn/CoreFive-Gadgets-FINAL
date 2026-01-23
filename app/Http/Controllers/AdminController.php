@@ -91,6 +91,45 @@ class AdminController extends Controller
     }
 
     /**
+     * Diagnostic endpoint for admins to check image file presence.
+     * Query param: `file` (filename or relative path)
+     * Returns JSON with presence in `public/images` and `storage/app/public/products` and DB matches.
+     */
+    public function diagnoseImage(\Illuminate\Http\Request $request)
+    {
+        $request->validate(['file' => 'required|string']);
+        $file = (string) $request->query('file');
+        // Normalize to filename only for checks
+        $filename = basename(str_replace('\\', '/', $file));
+
+        $publicPath = public_path('images/' . $filename);
+        $storagePath = storage_path('app/public/products/' . $filename);
+
+        $publicExists = \Illuminate\Support\Facades\File::exists($publicPath);
+        $storageExists = \Illuminate\Support\Facades\File::exists($storagePath);
+
+        $dbMatches = \Illuminate\Support\Facades\DB::table('products')
+            ->whereNotNull('image_path')
+            ->where(function ($q) use ($filename) {
+                $q->where('image_path', 'like', '%"' . $filename . '"%')
+                  ->orWhere('image_path', 'like', '%/' . $filename)
+                  ->orWhere('image_path', 'like', '%' . $filename);
+            })
+            ->select('product_id', 'image_path')
+            ->get();
+
+        return response()->json([
+            'requested' => $file,
+            'filename' => $filename,
+            'public_path' => str_replace('\\\', '/', $publicPath),
+            'storage_path' => str_replace('\\\', '/', $storagePath),
+            'public_exists' => $publicExists,
+            'storage_exists' => $storageExists,
+            'db_matches' => $dbMatches,
+        ]);
+    }
+
+    /**
      * Show list of all products
      */
     public function indexProducts(Request $request)

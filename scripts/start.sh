@@ -3,6 +3,10 @@ set -e
 
 cd /var/www/html
 
+composer install --no-dev --optimize-autoloader --no-interaction
+npm ci --silent && npm run build --silent || true
+composer run render-deploy
+
 
 php artisan storage:link || true
 php scripts/fix_deployed_images.php || true

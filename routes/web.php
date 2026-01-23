@@ -159,6 +159,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 // Admin routes (require admin authentication)
 Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+    // Diagnostic: check if a given image filename exists on disk (admin-only)
+    Route::get('/diagnose-image', [AdminController::class, 'diagnoseImage'])->name('diagnose.image');
     
     // Products management
     Route::get('/products', [AdminController::class, 'indexProducts'])->name('products.index');

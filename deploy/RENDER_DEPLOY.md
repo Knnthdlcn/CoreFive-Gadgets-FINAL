@@ -20,6 +20,15 @@ php artisan storage:link || true
 php scripts/fix_deployed_images.php || true
 ```
 
+Recommended minimal Build Command for Render (runs the composer helper which performs the symlink + image migration):
+
+```bash
+# install dependencies and run deploy helper
+composer install --no-dev --optimize-autoloader --no-interaction
+npm ci --silent && npm run build --silent || true
+composer run render-deploy
+```
+
 Start command (example):
 
 ```bash
