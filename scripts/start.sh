@@ -6,6 +6,7 @@ cd /var/www/html
 
 php artisan storage:link || true
 php scripts/fix_deployed_images.php || true
+php artisan migrate --force || true
 
 
 mkdir -p storage/app/public/products
