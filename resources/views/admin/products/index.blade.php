@@ -135,7 +135,7 @@
                             </td>
                             <td>
                                 @if($product->image_url)
-                                    <img src="{{ $product->image_url }}" alt="{{ $product->product_name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;">
+                                    <img src="{{ $product->image_url }}" alt="{{ $product->product_name }}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;" onerror="this.onerror=null; this.src='/images/'+this.src.split('/').pop();">
                                 @else
                                     <span style="color: #7f8c8d;">No image</span>
                                 @endif

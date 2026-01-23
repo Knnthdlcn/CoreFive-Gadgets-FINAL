@@ -58,7 +58,8 @@
                                         </div>
                                      <img src="{{ $item['product']->image_url }}" 
                                          alt="{{ $item['product']->product_name }}" 
-                                         class="cart-item-img">
+                                         class="cart-item-img"
+                                         onerror="this.onerror=null; this.src='/images/'+this.src.split('/').pop();">
                                     <div class="flex-grow-1">
                                         <div class="d-flex justify-content-between align-items-start mb-2">
                                             <div>

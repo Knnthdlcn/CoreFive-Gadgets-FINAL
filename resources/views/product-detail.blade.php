@@ -10,10 +10,11 @@
             <div class="col-md-5">
                 <div style="position: sticky; top: 70px;">
                     <div style="background: #f8f9fa; border-radius: 12px; padding: 20px;">
-                            <img src="{{ $product->image_url }}" 
-                                alt="{{ $product->product_name }}" 
-                                class="img-fluid rounded"
-                                style="width: 100%; height: auto; display: block;">
+                                <img src="{{ $product->image_url }}" 
+                                    alt="{{ $product->product_name }}" 
+                                    class="img-fluid rounded"
+                                    style="width: 100%; height: auto; display: block;"
+                                    onerror="this.onerror=null; this.src='/images/'+this.src.split('/').pop();">
                     </div>
                 </div>
             </div>
@@ -170,6 +171,7 @@
                                   <img src="{{ $relatedProduct->image_url }}" 
                                      class="card-img-top" 
                                      alt="{{ $relatedProduct->product_name }}"
+                                      onerror="this.onerror=null; this.src='/images/'+this.src.split('/').pop();"
                                      style="height: 180px; object-fit: cover; transition: transform 0.3s ease;">
                                 @if($relatedProduct->is_out_of_stock)
                                     <div class="position-absolute top-0 end-0 m-2">

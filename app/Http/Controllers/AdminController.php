@@ -16,6 +16,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class AdminController extends Controller
 {
@@ -167,8 +169,26 @@ class AdminController extends Controller
         if ($request->hasFile('image')) {
             // Store on the `public` disk (storage/app/public/products/...)
             $path = $request->file('image')->store('products', 'public');
-            // Use the public symlink path so asset() resolves correctly: public/storage/products/...
-            $validated['image_path'] = 'storage/' . $path;
+            // Ensure public/images exists
+            $filename = basename($path);
+            $publicImagesDir = public_path('images');
+            if (!File::exists($publicImagesDir)) {
+                File::makeDirectory($publicImagesDir, 0755, true);
+            }
+
+            // Copy the stored file to public/images so it's immediately web-accessible
+            $src = Storage::disk('public')->path($path);
+            $dest = $publicImagesDir . DIRECTORY_SEPARATOR . $filename;
+            try {
+                if (File::exists($src) && !File::exists($dest)) {
+                    File::copy($src, $dest);
+                }
+            } catch (\Throwable $e) {
+                // Non-fatal; continue but keep storage path as fallback
+            }
+
+            // Prefer public images path for site visitors
+            $validated['image_path'] = 'images/' . $filename;
         }
         unset($validated['image']);
 
@@ -221,9 +241,25 @@ class AdminController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            // Store new image on public disk and set image path to the storage symlink path
+            // Store new image on public disk
             $path = $request->file('image')->store('products', 'public');
-            $validated['image_path'] = 'storage/' . $path;
+            $filename = basename($path);
+            $publicImagesDir = public_path('images');
+            if (!File::exists($publicImagesDir)) {
+                File::makeDirectory($publicImagesDir, 0755, true);
+            }
+            $src = Storage::disk('public')->path($path);
+            $dest = $publicImagesDir . DIRECTORY_SEPARATOR . $filename;
+            try {
+                if (File::exists($src) && !File::exists($dest)) {
+                    File::copy($src, $dest);
+                }
+            } catch (\Throwable $e) {
+                // ignore copy failure
+            }
+
+            // Use public images path so visitors can access it directly
+            $validated['image_path'] = 'images/' . $filename;
         }
         unset($validated['image']);
 
