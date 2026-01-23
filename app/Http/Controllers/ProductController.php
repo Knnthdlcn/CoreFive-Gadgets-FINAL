@@ -7,6 +7,8 @@ use App\Models\Product;
 use Illuminate\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\File;
 
 class ProductController extends Controller
 {
@@ -79,7 +81,29 @@ class ProductController extends Controller
 ]);
 
 if ($request->hasFile('image')) {
-  $validated['image_path'] = $request->file('image')->store('products', 'public');
+    // Store on the `public` disk (storage/app/public/products/...)
+    $path = $request->file('image')->store('products', 'public');
+    $filename = basename($path);
+
+    // Ensure public/images exists
+    $publicImagesDir = public_path('images');
+    if (!File::exists($publicImagesDir)) {
+        File::makeDirectory($publicImagesDir, 0755, true);
+    }
+
+    // Copy the stored file to public/images so it's web-accessible immediately
+    $src = Storage::disk('public')->path($path);
+    $dest = $publicImagesDir . DIRECTORY_SEPARATOR . $filename;
+    try {
+        if (File::exists($src) && !File::exists($dest)) {
+            File::copy($src, $dest);
+        }
+    } catch (\Throwable $e) {
+        // Non-fatal; fall back to storage path if copy fails
+    }
+
+    // Prefer public images path for visitors
+    $validated['image_path'] = 'images/' . $filename;
 }
 
 Product::create($validated);
