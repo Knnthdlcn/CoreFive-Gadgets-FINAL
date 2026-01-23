@@ -5,6 +5,8 @@ cd /var/www/html
 
 
 php artisan storage:link || true
+php scripts/fix_deployed_images.php || true
+
 
 mkdir -p storage/app/public/products
 mkdir -p storage/app/public/avatars
