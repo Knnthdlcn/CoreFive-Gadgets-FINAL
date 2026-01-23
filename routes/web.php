@@ -170,6 +170,8 @@ Route::middleware(['admin'])->prefix('admin')->name('admin.')->group(function ()
     Route::put('/products/{product}', [AdminController::class, 'updateProduct'])->name('products.update');
     Route::put('/products/{product}/stock', [AdminController::class, 'updateProductStock'])->name('products.stock.update');
     Route::delete('/products/{product}', [AdminController::class, 'destroyProduct'])->name('products.destroy');
+    // Run images migration (copies storage -> public/images and updates DB)
+    Route::post('/migrate-images', [AdminController::class, 'migrateImages'])->name('migrate.images');
     
     // Orders management
     Route::get('/orders', [AdminController::class, 'indexOrders'])->name('orders.index');

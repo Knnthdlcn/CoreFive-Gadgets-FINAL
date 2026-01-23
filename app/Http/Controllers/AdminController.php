@@ -130,6 +130,24 @@ class AdminController extends Controller
     }
 
     /**
+     * Trigger the images migration Artisan command (admin-only).
+     * Use POST /admin/migrate-images to run. Returns command output.
+     */
+    public function migrateImages(Request $request)
+    {
+        // Route protect via admin middleware; this method assumes admin guard already applied by routes.
+        $dry = $request->boolean('dry_run');
+        $cmd = 'images:migrate' . ($dry ? ' --dry-run' : '');
+        try {
+            \Artisan::call($cmd);
+            $output = trim(\Artisan::output());
+            return response()->json(['ok' => true, 'output' => $output]);
+        } catch (\Throwable $e) {
+            return response()->json(['ok' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
      * Show list of all products
      */
     public function indexProducts(Request $request)
