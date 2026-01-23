@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -559,33 +560,48 @@ class OrderController extends Controller
         $now = now();
         $deadline = $now->copy()->addDays(7);
 
-        DB::transaction(function () use ($order, $validated, $byId, $now, $deadline) {
-            $ret = OrderReturn::create([
-                'order_id' => $order->id,
-                'user_id' => auth()->id(),
-                'status' => 'requested',
-                'reason' => $validated['reason'],
-                'requested_at' => $now,
-                'deadline_at' => $deadline,
-            ]);
+        // Log the incoming return request for debugging
+        Log::info('Requesting return', ['order_id' => $order->id, 'user_id' => auth()->id(), 'items' => $validated['items']]);
 
-            foreach ($validated['items'] as $row) {
-                $orderItemId = (int) ($row['order_item_id'] ?? 0);
-                $qty = (int) ($row['quantity'] ?? 0);
-                $oi = $byId->get($orderItemId);
-                if (!$oi) {
-                    continue;
-                }
-                $maxQty = max(1, (int) $oi->quantity);
-                $qty = max(1, min($qty, $maxQty));
-
-                OrderReturnItem::create([
-                    'order_return_id' => $ret->id,
-                    'order_item_id' => $oi->id,
-                    'quantity' => $qty,
+        $createdReturn = null;
+        try {
+            DB::transaction(function () use ($order, $validated, $byId, $now, $deadline, &$createdReturn) {
+                $ret = OrderReturn::create([
+                    'order_id' => $order->id,
+                    'user_id' => auth()->id(),
+                    'status' => 'requested',
+                    'reason' => $validated['reason'],
+                    'requested_at' => $now,
+                    'deadline_at' => $deadline,
                 ]);
-            }
-        });
+
+                foreach ($validated['items'] as $row) {
+                    $orderItemId = (int) ($row['order_item_id'] ?? 0);
+                    $qty = (int) ($row['quantity'] ?? 0);
+                    $oi = $byId->get($orderItemId);
+                    if (!$oi) {
+                        continue;
+                    }
+                    $maxQty = max(1, (int) $oi->quantity);
+                    $qty = max(1, min($qty, $maxQty));
+
+                    OrderReturnItem::create([
+                        'order_return_id' => $ret->id,
+                        'order_item_id' => $oi->id,
+                        'quantity' => $qty,
+                    ]);
+                }
+
+                $createdReturn = $ret;
+            });
+        } catch (\Throwable $e) {
+            Log::error('Failed to create return request', ['order_id' => $order->id, 'error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Failed to submit return request. Please try again later.');
+        }
+
+        if ($createdReturn) {
+            Log::info('Return request created', ['order_id' => $order->id, 'return_id' => $createdReturn->id]);
+        }
 
         return redirect()->back()->with('success', 'Return request submitted. You have 7 days to return the item(s).');
     }
