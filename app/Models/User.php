@@ -66,4 +66,28 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Order::class);
     }
+
+    public function getNameAttribute(): string
+    {
+        return trim(((string) ($this->first_name ?? '')) . ' ' . ((string) ($this->last_name ?? '')));
+    }
+
+    public function setNameAttribute($value): void
+    {
+        $name = trim((string) $value);
+        if ($name === '') {
+            $this->attributes['first_name'] = '';
+            $this->attributes['last_name'] = '';
+            return;
+        }
+
+        $parts = preg_split('/\s+/', $name) ?: [];
+        $first = $parts[0] ?? $name;
+        $last = count($parts) > 1 ? implode(' ', array_slice($parts, 1)) : '';
+
+        $this->attributes['first_name'] = $first;
+        $this->attributes['last_name'] = $last;
+    }
+
+    
 }

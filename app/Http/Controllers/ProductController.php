@@ -71,18 +71,19 @@ class ProductController extends Controller
         }
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price' => 'required|numeric|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ]);
+        'product_name' => 'required|string|max:255',
+        'description'  => 'required|string',
+        'price'        => 'required|numeric|min:0',
+        'category'     => 'nullable|string|max:255',
+        'image'        => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+]);
 
-        if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('products', 'public');
-            $validated['image'] = $imagePath;
-        }
+if ($request->hasFile('image')) {
+  $validated['image_path'] = $request->file('image')->store('products', 'public');
+}
 
-        Product::create($validated);
+Product::create($validated);
+
 
         return redirect()->route('products.index')->with('success', 'Product added successfully!');
     }
