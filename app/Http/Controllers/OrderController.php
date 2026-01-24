@@ -678,4 +678,56 @@ class OrderController extends Controller
 
         return redirect()->back()->with('success', 'Order marked as complete. Returns are now disabled for this order.');
     }
+
+    public function cancel(Request $request, Order $order)
+    {
+        if ((int) $order->user_id !== (int) auth()->id()) {
+            abort(403);
+        }
+
+        // Do not allow cancellation for completed, delivered or already cancelled orders
+        if ($order->completed_at || in_array((string) $order->status, ['delivered', 'completed', 'cancelled'], true)) {
+            return redirect()->back()->with('error', 'This order cannot be cancelled.');
+        }
+
+        // Allow cancellation only for pending or processing orders
+        $cancellable = in_array((string) $order->status, ['pending', 'processing'], true);
+        if (!$cancellable) {
+            return redirect()->back()->with('error', 'This order cannot be cancelled at its current status.');
+        }
+
+        try {
+            DB::transaction(function () use ($order) {
+                // Restock inventory for each item
+                foreach ($order->items as $item) {
+                    if ($item->product_variant_id) {
+                        $variant = ProductVariant::where('id', $item->product_variant_id)->first();
+                        if ($variant && !(bool) ($variant->stock_unlimited ?? false)) {
+                            $variant->stock = (int) ($variant->stock ?? 0) + (int) $item->quantity;
+                            $variant->save();
+                        }
+                    } else {
+                        $product = Product::where('product_id', (int) $item->product_id)->first();
+                        if ($product && !(bool) ($product->stock_unlimited ?? false)) {
+                            $product->stock = (int) ($product->stock ?? 0) + (int) $item->quantity;
+                            $product->stock_updated_at = now();
+                            $product->save();
+                        }
+                    }
+                }
+
+                $order->status = 'cancelled';
+                // Set cancelled_at if column exists
+                if (\Illuminate\Support\Facades\Schema::hasColumn('orders', 'cancelled_at')) {
+                    $order->cancelled_at = now();
+                }
+                $order->save();
+            });
+        } catch (\Throwable $e) {
+            Log::error('Failed to cancel order', ['order_id' => $order->id, 'error' => $e->getMessage()]);
+            return redirect()->back()->with('error', 'Failed to cancel the order. Please try again later.');
+        }
+
+        return redirect()->back()->with('success', 'Order cancelled successfully.');
+    }
 }

@@ -69,6 +69,18 @@ class AdminController extends Controller
             'total_contacts' => Contact::withTrashed()->count(),
         ];
 
+        // Additional dashboard counts used by the Blade template.
+        try {
+            $stats['total_revenue'] = (float) Order::where('status', '!=', 'cancelled')->sum('total');
+        } catch (\Throwable $e) {
+            \Log::warning('Could not calculate total_revenue for dashboard: ' . $e->getMessage());
+            $stats['total_revenue'] = 0.0;
+        }
+
+        $stats['pending_orders'] = Order::where('status', 'pending')->count();
+        $stats['completed_orders'] = Order::where('status', 'completed')->count();
+        $stats['unread_contacts'] = Contact::where('status', 'new')->count();
+
         // Show recent orders and contacts for quick access in the admin UI.
         $recent_orders = Order::with('user')->latest('created_at')->take(10)->get();
         $recent_contacts = Contact::latest('created_at')->take(10)->get();

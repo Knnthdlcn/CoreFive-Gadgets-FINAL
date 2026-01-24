@@ -262,6 +262,18 @@
                                                                 </button>
                                                             </form>
                                                         @endif
+
+                                                        @php
+                                                            $canCancel = in_array((string) $order->status, ['pending', 'processing'], true);
+                                                        @endphp
+                                                        @if($canCancel)
+                                                            <form method="POST" action="{{ route('orders.cancel', $order) }}" onsubmit="return confirm('Cancel this order? This will restock items and cannot be undone.');" style="margin-left:6px;">
+                                                                @csrf
+                                                                <button type="submit" class="btn btn-sm btn-outline-danger" style="border-radius: 999px; font-weight: 900;">
+                                                                    <i class="fas fa-ban me-1"></i>Cancel order
+                                                                </button>
+                                                            </form>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </div>
