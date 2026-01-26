@@ -91,6 +91,10 @@ copy .env.testing.example .env.testing
 
 4. Run tests:
 
-```bash
+```bash[CoreFive-Gadgets-User-Manual.pdf](https://github.com/user-attachments/files/24859978/CoreFive-Gadgets-User-Manual.pdf)
+
 php artisan test
 ```
+
+
+
