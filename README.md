@@ -1,3 +1,8 @@
+
+[CoreFive-Gadgets-User-Manual.pdf](https://github.com/user-attachments/files/24859994/CoreFive-Gadgets-User-Manual.pdf)
+
+
+
 # CoreFive Gadgets (Laravel)
 
 ## Requirements
