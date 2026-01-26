@@ -24,7 +24,7 @@
                         Enter the 6-digit verification code sent to your email.
                     </p>
 
-                    <form method="POST" action="{{ route('verification.otp.verify') }}" class="mb-3">
+                    <form method="POST" action="/email/verify-otp" class="mb-3">
                         @csrf
                         <label for="code" class="form-label" style="font-weight: 700; color:#1f2d3a;">Verification code</label>
                         <input
@@ -49,7 +49,7 @@
                         </button>
                     </form>
 
-                    <form method="POST" action="{{ route('verification.send') }}">
+                    <form method="POST" action="/email/verification-notification">
                         @csrf
                         <button type="submit" class="btn" style="background: linear-gradient(135deg, #1565c0 0%, #0d47a1 100%); color:#fff; border:none; border-radius: 10px; padding: 12px 16px; font-weight: 800; box-shadow: 0 8px 18px rgba(21, 101, 192, 0.25);">
                             Resend code

@@ -465,7 +465,7 @@
                     }
                 @endphp
 
-                <a href="{{ route('cart.index') }}" class="icon-btn" aria-label="Cart">
+                <a href="/cart" class="icon-btn" aria-label="Cart">
                     <i class="fas fa-cart-shopping"></i>
                     <span
                         class="badge bg-white text-dark"
@@ -525,7 +525,7 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link px-3 position-relative" href="{{ route('cart.index') }}" style="font-weight: 500; transition: all 0.3s ease;">
+                        <a class="nav-link px-3 position-relative" href="/cart" style="font-weight: 500; transition: all 0.3s ease;">
                             <i class="fas fa-shopping-cart me-1"></i>Cart
                             @php
                                 if (Auth::check()) {
@@ -598,7 +598,7 @@
                     <i class="fas fa-box nav-ico"></i>
                     <span>Products</span>
                 </a>
-                <a href="{{ route('cart.index') }}" class="d-flex flex-column align-items-center position-relative {{ request()->routeIs('cart.*') ? 'active' : '' }}">
+                <a href="/cart" class="d-flex flex-column align-items-center position-relative {{ request()->routeIs('cart.*') ? 'active' : '' }}">
                     <i class="fas fa-cart-shopping nav-ico"></i>
                     <span
                         class="badge bg-warning text-dark"
@@ -673,7 +673,7 @@
                             </a>
                         </li>
                         <li class="mb-2">
-                            <a href="{{ route('cart.index') }}" class="text-decoration-none" style="transition: all 0.3s ease; font-size: 0.95rem; color: rgba(255, 255, 255, 0.8);">
+                            <a href="/cart" class="text-decoration-none" style="transition: all 0.3s ease; font-size: 0.95rem; color: rgba(255, 255, 255, 0.8);">
                                 <i class="fas fa-chevron-right me-2" style="font-size: 0.7rem;"></i>Cart
                             </a>
                         </li>

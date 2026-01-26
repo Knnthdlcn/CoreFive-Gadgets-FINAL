@@ -28,7 +28,6 @@ class PhilippinesAddressController extends Controller
             return DB::table('philippine_provinces')
                 ->where('region_code', $regionCode)
                 ->select(['province_code as code', 'name'])
-                ->orderBy('name')
                 ->get();
         });
 

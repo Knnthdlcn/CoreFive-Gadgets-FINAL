@@ -397,7 +397,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return;
             }
             
-            fetch('{{ route("cart.add") }}', {
+                        fetch('/cart/add', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -443,7 +443,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             buyNowBtn.disabled = true;
 
-            fetch('{{ route("buy-now") }}', {
+            fetch('/buy-now', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -471,7 +471,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
 
                 if (data && data.success) {
-                    window.location.href = data.redirect || '{{ route("checkout.index") }}';
+                    window.location.href = data.redirect || '/checkout';
                 } else {
                     showToast('Error', data?.message || 'Failed to add to cart', 'error');
                 }
@@ -498,7 +498,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function updateCartCount() {
-        fetch('{{ route("cart.get") }}')
+        fetch('/cart/get')
             .then(response => response.json())
             .then(data => {
                 if (data.cart_count === undefined) return;

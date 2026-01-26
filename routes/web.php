@@ -131,7 +131,6 @@ Route::middleware(['web'])->group(function () {
         Route::post('/orders/{order}/buy-again', [OrderController::class, 'buyAgain'])->name('orders.buy-again');
         Route::post('/orders/{order}/review', [OrderController::class, 'submitReview'])->name('orders.review');
         Route::post('/orders/{order}/return', [OrderController::class, 'requestReturn'])->name('orders.return');
-        Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
         Route::post('/orders/{order}/complete', [OrderController::class, 'markComplete'])->name('orders.complete');
 
         Route::get('/profile', [AuthController::class, 'profile'])->name('profile');

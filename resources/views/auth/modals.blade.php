@@ -237,7 +237,7 @@
     </div>
 </div>
 
-<script src="{{ asset('js/ph-address.js') }}"></script>
+<script src="/js/ph-address.js?v={{ @filemtime(public_path('js/ph-address.js')) ?: time() }}"></script>
 
 <script>
 function switchToLogin(e) {
@@ -318,7 +318,7 @@ document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
     
     const formData = new FormData(e.target);
     try {
-        const response = await fetch('{{ route("login") }}', {
+        const response = await fetch('/login', {
             method: 'POST',
             body: formData,
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
@@ -440,7 +440,7 @@ document.getElementById('signupForm')?.addEventListener('submit', async (e) => {
     // Submit form if all validations pass
     const formData = new FormData(e.target);
     try {
-        const response = await fetch('{{ route("signup") }}', {
+        const response = await fetch('/signup', {
             method: 'POST',
             body: formData,
             headers: { 'X-Requested-With': 'XMLHttpRequest' }

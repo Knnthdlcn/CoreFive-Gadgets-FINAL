@@ -90,9 +90,33 @@
       selectEl.disabled = true;
     };
 
-    // load regions
-    const regions = await fetchJson('/api/ph/regions');
+    // load regions (gracefully handle network / API failures)
+    let regions = [];
+    try {
+      regions = await fetchJson('/api/ph/regions');
+    } catch (err) {
+      console.warn('PHAddress: failed to load regions from API, attempting local fallback', err);
+      // attempt local static fallback (served from public/js)
+      try {
+        const res = await fetch('/js/ph-address-fallback.json', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+        if (res.ok) {
+          regions = await res.json();
+        } else {
+          regions = [];
+        }
+      } catch (err2) {
+        console.warn('PHAddress: failed to load fallback JSON', err2);
+        regions = [];
+      }
+    }
+
     setOptions(regionSelect, regions, 'Select region');
+    // if no regions were loaded, keep the selector disabled so UX doesn't suggest a bogus choice
+    if (!regions || regions.length === 0) {
+      if (regionSelect) regionSelect.disabled = true;
+    } else {
+      if (regionSelect) regionSelect.disabled = false;
+    }
 
     const loadProvinces = async (regionCode) => {
       resetSelect(provinceSelect, 'Select province');
@@ -102,9 +126,15 @@
         updatePreview();
         return;
       }
-      const provinces = await fetchJson('/api/ph/regions/' + encodeURIComponent(regionCode) + '/provinces');
+      let provinces = [];
+      try {
+        provinces = await fetchJson('/api/ph/regions/' + encodeURIComponent(regionCode) + '/provinces');
+      } catch (err) {
+        console.warn('PHAddress: failed to load provinces for', regionCode, err);
+        provinces = [];
+      }
       setOptions(provinceSelect, provinces, 'Select province');
-      provinceSelect.disabled = false;
+      provinceSelect.disabled = !(provinces && provinces.length > 0);
     };
 
     const loadCities = async (provinceCode) => {
@@ -114,9 +144,15 @@
         updatePreview();
         return;
       }
-      const cities = await fetchJson('/api/ph/provinces/' + encodeURIComponent(provinceCode) + '/cities');
+      let cities = [];
+      try {
+        cities = await fetchJson('/api/ph/provinces/' + encodeURIComponent(provinceCode) + '/cities');
+      } catch (err) {
+        console.warn('PHAddress: failed to load cities for', provinceCode, err);
+        cities = [];
+      }
       setOptions(citySelect, cities, 'Select city/municipality');
-      citySelect.disabled = false;
+      citySelect.disabled = !(cities && cities.length > 0);
     };
 
     const loadBarangays = async (cityCode) => {
@@ -125,9 +161,15 @@
         updatePreview();
         return;
       }
-      const barangays = await fetchJson('/api/ph/cities/' + encodeURIComponent(cityCode) + '/barangays');
+      let barangays = [];
+      try {
+        barangays = await fetchJson('/api/ph/cities/' + encodeURIComponent(cityCode) + '/barangays');
+      } catch (err) {
+        console.warn('PHAddress: failed to load barangays for', cityCode, err);
+        barangays = [];
+      }
       setOptions(barangaySelect, barangays, 'Select barangay');
-      barangaySelect.disabled = false;
+      barangaySelect.disabled = !(barangays && barangays.length > 0);
     };
 
     regionSelect?.addEventListener('change', async () => {

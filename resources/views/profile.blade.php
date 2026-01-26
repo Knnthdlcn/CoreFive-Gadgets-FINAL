@@ -170,7 +170,7 @@
             <div class="col-lg-4 mb-4">
                 <div class="card border-0 shadow-sm text-center" style="border-radius: 12px;">
                     <div class="card-body" style="padding: 32px;">
-                        <form action="{{ route('profile.photo') }}" method="POST" enctype="multipart/form-data" id="photoForm">
+                        <form action="/profile/photo" method="POST" enctype="multipart/form-data" id="photoForm">
                             <img src="{{ asset('storage/' . $user->avatar) }}">
                             @csrf
                             @method('PUT')
@@ -255,7 +255,7 @@
                         <h5 class="card-title mb-4" style="font-weight: 700; color: #2c3e50;">
                             <i class="fas fa-info-circle me-2" style="color: #ffc107;"></i>Account Information
                         </h5>
-                        <form action="{{ route('profile.update') }}" method="POST">
+                        <form action="/profile" method="POST">
                             @csrf
                             @method('PUT')
                             
@@ -349,7 +349,7 @@
                         <h5 class="card-title mb-4" style="font-weight: 700; color: #2c3e50;">
                             <i class="fas fa-lock me-2" style="color: #ffc107;"></i>Change Password
                         </h5>
-                        <form action="{{ route('profile.password') }}" method="POST">
+                        <form action="/profile/password" method="POST">
                             @csrf
                             @method('PUT')
                             
@@ -383,7 +383,7 @@
                         <h5 class="card-title mb-3" style="font-weight: 700; color: #2c3e50;">
                             <i class="fas fa-right-from-bracket me-2" style="color: #dc3545;"></i>Logout
                         </h5>
-                        <form method="POST" action="{{ route('logout') }}">
+                        <form method="POST" action="/logout">
                             @csrf
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-outline-danger" style="font-weight: 700; border-radius: 10px; padding: 12px; border-width: 2px;">
@@ -399,7 +399,7 @@
 @endsection
 
 @push('scripts')
-    <script src="{{ asset('js/ph-address.js') }}"></script>
+            <script src="/js/ph-address.js?v={{ @filemtime(public_path('js/ph-address.js')) ?: time() }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -562,7 +562,7 @@
                     formData.append('profile_photo', new File([blob], 'profile.jpg', { type: 'image/jpeg' }));
 
                     const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-                    const response = await fetch(@json(route('profile.photo')), {
+                    const response = await fetch('/profile/photo', {
                         method: 'POST',
                         body: formData,
                         headers: {
@@ -613,6 +613,8 @@
                         city: @json(Auth::user()->address_city_code),
                         barangay: @json(Auth::user()->address_barangay_code),
                     },
+                }).catch(err => {
+                    console.warn('PHAddress init failed on profile, continuing without remote data', err);
                 });
             }
 

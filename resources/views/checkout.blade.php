@@ -408,7 +408,7 @@
             };
         </script>
         @endif
-        <script src="{{ asset('js/ph-address.js') }}"></script>
+        <script src="/js/ph-address.js?v={{ @filemtime(public_path('js/ph-address.js')) ?: time() }}"></script>
         <script src="{{ asset('js/checkout.js') }}?v={{ @filemtime(public_path('js/checkout.js')) ?: time() }}"></script>
         <script>
             document.addEventListener('DOMContentLoaded', () => {
@@ -437,31 +437,38 @@
                     builder.dataset.inited = '1';
 
                     if (window.PHAddress && window.PHAddress.initSelector) {
-                        await window.PHAddress.initSelector({
-                            regionSelect: '#checkoutRegion',
-                            provinceSelect: '#checkoutProvince',
-                            citySelect: '#checkoutCity',
-                            barangaySelect: '#checkoutBarangay',
-                            streetInput: '#checkoutStreet',
-                            postalInput: '#checkoutPostal',
-                            previewTextarea: '#shippingAddress',
-                            onAnyChange: () => {},
-                            initial: {
-                                region: window.savedShippingAddressCodes?.region || '',
-                                province: window.savedShippingAddressCodes?.province || '',
-                                city: window.savedShippingAddressCodes?.city || '',
-                                barangay: window.savedShippingAddressCodes?.barangay || '',
-                            },
-                        });
+                        try {
+                            await window.PHAddress.initSelector({
+                                regionSelect: '#checkoutRegion',
+                                provinceSelect: '#checkoutProvince',
+                                citySelect: '#checkoutCity',
+                                barangaySelect: '#checkoutBarangay',
+                                streetInput: '#checkoutStreet',
+                                postalInput: '#checkoutPostal',
+                                previewTextarea: '#shippingAddress',
+                                onAnyChange: () => {},
+                                initial: {
+                                    region: window.savedShippingAddressCodes?.region || '',
+                                    province: window.savedShippingAddressCodes?.province || '',
+                                    city: window.savedShippingAddressCodes?.city || '',
+                                    barangay: window.savedShippingAddressCodes?.barangay || '',
+                                },
+                            });
 
-                        // Pre-fill street/postal if we have it
-                        const street = document.getElementById('checkoutStreet');
-                        const postal = document.getElementById('checkoutPostal');
-                        if (street && !street.value && window.savedShippingAddressCodes?.street) street.value = window.savedShippingAddressCodes.street;
-                        if (postal && !postal.value && window.savedShippingAddressCodes?.postal) postal.value = window.savedShippingAddressCodes.postal;
-                        // Trigger preview recompute
-                        street?.dispatchEvent(new Event('input'));
-                        postal?.dispatchEvent(new Event('input'));
+                            // Pre-fill street/postal if we have it
+                            const street = document.getElementById('checkoutStreet');
+                            const postal = document.getElementById('checkoutPostal');
+                            if (street && !street.value && window.savedShippingAddressCodes?.street) street.value = window.savedShippingAddressCodes.street;
+                            if (postal && !postal.value && window.savedShippingAddressCodes?.postal) postal.value = window.savedShippingAddressCodes.postal;
+                            // Trigger preview recompute
+                            street?.dispatchEvent(new Event('input'));
+                            postal?.dispatchEvent(new Event('input'));
+                        } catch (err) {
+                            console.warn('PHAddress init failed on checkout, falling back to manual address input', err);
+                            // hide builder and allow manual address entry so users can still checkout
+                            if (builder) builder.style.display = 'none';
+                            if (addressTextarea) addressTextarea.removeAttribute('readonly');
+                        }
                     }
                 };
 

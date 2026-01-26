@@ -29,7 +29,7 @@
                         Enter the 6-digit verification code sent to your email.
                     </p>
 
-                    <form method="POST" action="{{ route('verification.guest.verify') }}" class="mb-3">
+                    <form method="POST" action="/email/verify-otp-guest" class="mb-3">
                         @csrf
                         <input type="hidden" name="next" value="{{ old('next', $next ?? request('next')) }}">
                         {{-- Keep email as hidden so resend and verification can use it when provided via query or prior form --}} 
@@ -58,7 +58,7 @@
                         </button>
                     </form>
 
-                    <form method="POST" action="{{ route('verification.guest.send') }}">
+                    <form method="POST" action="/email/verification-notification-guest">
                         @csrf
                         <input type="hidden" name="next" value="{{ old('next', $next ?? request('next')) }}">
                         <input type="hidden" name="email" value="{{ old('email', $email ?? request('email')) }}">

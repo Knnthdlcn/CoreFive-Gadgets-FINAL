@@ -107,7 +107,8 @@ php artisan migrate --force || true
 
 # --- Nginx config from template ---
 : "${PORT:=10000}"
-envsubst '${PORT}' < /etc/nginx/templates/default.conf.template > /etc/nginx/sites-enabled/default
+# Render nginx template into sites-available then enable via symlink
+envsubst '${PORT}' < /etc/nginx/templates/default.conf.template > /etc/nginx/sites-available/default
 ln -sf /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default
 
 

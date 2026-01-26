@@ -24,7 +24,7 @@
                 </a>
             </div>
         @else
-            <form id="cartCheckoutForm" method="GET" action="{{ route('checkout.index') }}">
+            <form id="cartCheckoutForm" method="GET" action="/checkout">
             <div class="row">
             <!-- Items list -->
             <div class="col-lg-8 mb-4">
@@ -350,7 +350,7 @@
                 const productId = this.dataset.productId;
                 const variantId = this.dataset.variantId || null;
 
-                fetch('{{ route("cart.remove") }}', {
+                fetch('/cart/remove', {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',
@@ -369,7 +369,7 @@
 
         // Update quantity
         function updateQuantity(productId, variantId, quantity) {
-            fetch('{{ route("cart.update") }}', {
+                        fetch('/cart/update', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -441,7 +441,7 @@
         const clearCartBtn = document.getElementById('clearCartBtn');
         if (clearCartBtn) {
             clearCartBtn.addEventListener('click', function() {
-                fetch('{{ route("cart.clear") }}', {
+                fetch('/cart/clear', {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json',

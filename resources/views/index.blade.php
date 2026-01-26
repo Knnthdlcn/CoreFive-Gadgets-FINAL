@@ -427,7 +427,7 @@
                             return;
                         }
                         
-                        fetch('{{ route("cart.add") }}', {
+                        fetch('/cart/add', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -481,7 +481,7 @@
                             return;
                         }
                         
-                        fetch('{{ route("buy-now") }}', {
+                        fetch('/buy-now', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -501,7 +501,7 @@
                         })
                         .then(data => {
                             if (data && data.success) {
-                                window.location.href = data.redirect || '{{ route("checkout.index") }}';
+                                window.location.href = data.redirect || '/checkout';
                             } else {
                                 showToast('Error', data?.message || 'Unable to proceed to checkout', 'error');
                             }
@@ -537,7 +537,7 @@
                             return;
                         }
                         
-                        fetch('{{ route("cart.add") }}', {
+                        fetch('/cart/add', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -575,7 +575,7 @@
                         const productData = JSON.parse(this.dataset.product);
                         const productId = productData.product_id;
                         
-                        fetch('{{ route("buy-now") }}', {
+                        fetch('/buy-now', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -595,7 +595,7 @@
                         })
                         .then(data => {
                             if (data && data.success) {
-                                window.location.href = data.redirect || '{{ route("checkout.index") }}';
+                                window.location.href = data.redirect || '/checkout';
                             } else {
                                 showToast('Error', data?.message || 'Unable to proceed to checkout', 'error');
                             }
@@ -636,7 +636,7 @@
             document.head.appendChild(style);
 
             function updateCartCount() {
-                fetch('{{ route("cart.get") }}')
+                fetch('/cart/get')
                     .then(response => response.json())
                     .then(data => {
                         if (data.cart_count === undefined) return;
